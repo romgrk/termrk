@@ -1,4 +1,5 @@
-TermrkView = require './termrk-view'
+
+TermrkView            = require './termrk-view'
 {CompositeDisposable} = require 'atom'
 
 module.exports = Termrk =

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "pty.js": "^0.2.7-1",
+    "space-pen": "^5.1.1",
     "term.js": "0.0.4"
   }
 }
