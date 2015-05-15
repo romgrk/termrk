@@ -1,0 +1,18 @@
+{
+  "name": "Termrk",
+  "main": "./lib/termrk",
+  "version": "0.0.0",
+  "description": "A short description of your package",
+  "activationCommands": {
+    "atom-workspace": "termrk:toggle"
+  },
+  "repository": "https://github.com/romgrk/termrk",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=0.174.0 <2.0.0"
+  },
+  "dependencies": {
+    "pty.js": "^0.2.7-1",
+    "term.js": "0.0.4"
+  }
+}
