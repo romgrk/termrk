@@ -19,30 +19,38 @@ module.exports = Termrk =
     activate: (state) ->
         @subscriptions = new CompositeDisposable
 
-        @subscriptions.add atom.commands.add 'atom-workspace',
-            'termrk:toggle': => @toggle()
-
         @panel = atom.workspace.addBottomPanel(
             item: @getActiveTerminal().getElement()
             visible: false )
-        @panelView = $(atom.views.getView(@panel))
 
+        @panelView = $(atom.views.getView(@panel))
         @panelView.height '400px'
-        console.log @panelView
+
+        @subscriptions.add atom.commands.add 'atom-workspace',
+            'termrk:toggle': => @toggle()
+            'termrk:create-terminal': => @createTerminal()
 
         @$ = $
         window.termrk = @
 
     createTerminal: () ->
+        if @activeTerminal?
+            @activeTerminal.animatedHide()
+
         termrkView = new TermrkView()
+        termrkView.height('0')
         @terminals.push termrkView
+        @setActiveTerminal(termrkView)
         return termrkView
 
     getActiveTerminal: ->
         @activeTerminal ?= @createTerminal()
 
     setActiveTerminal: (term) ->
+        return if term is @activeTerminal
+        @activeTerminal.animatedHide()
         @activeTerminal = term
+        @activeTerminal.animatedShow()
 
     deactivate: ->
         for term in @terminals
@@ -58,11 +66,4 @@ module.exports = Termrk =
             @panel.hide()
         else
             @panel.show()
-
-            dimensions = [@panelView.width(), @panelView.height()]
-            font       = @activeTerminal.terminalView.css('font')
-            fontWidth  = Font.getWidth("a", font)
-            fontHeight = Font.getHeight("a", font)
-
-            cols = dimensions[0] / fontWidth
-            rows = dimensions[1] / fontHeight
+            @activeTerminal.updateTerminalSize()

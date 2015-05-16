@@ -1,10 +1,13 @@
 
+Q = require 'q'
 
 {CompositeDisposable} = require 'atom'
 {$, $$, View}         = require 'space-pen'
 
 pty        = require('pty.js')
 {Terminal} = require('term.js')
+
+{Font} = require './utils'
 
 module.exports =
 class TermrkView extends View
@@ -53,6 +56,17 @@ class TermrkView extends View
         @terminal.on 'data', (data) =>
             @process.write(data)
 
+    animatedShow: ->
+        @show()
+        Q.fcall(=> @animate({height: '100%'}, 250).promise())
+        .then(-> console.log 'showed')
+
+    animatedHide: ->
+        Q.fcall(=> @animate({height: '0'}, 250).promise())
+        .then(=> @hide())
+        .then(-> console.log 'hidden')
+
+    # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
         @terminal = new Terminal
             cols: 80
@@ -64,7 +78,30 @@ class TermrkView extends View
 
         @terminalView = $(@element).find('.terminal')
 
-    # Returns an object that can be retrieved when package is activated
+    # Public: update the terminal cols/rows based on the panel size
+    updateTerminalSize: ->
+        dimensions = [@getParent().width(), @getParent().height()]
+
+        font       = @terminalView.css('font')
+        fontWidth  = Font.getWidth("a", font)
+        fontHeight = Font.getHeight("a", font)
+
+        cols = Math.floor(dimensions[0] / fontWidth)
+        rows = Math.floor(dimensions[1] / fontHeight)
+
+        console.log dimensions
+        console.log font
+        console.log fontWidth, fontHeight
+        console.log cols, rows
+
+        @terminal.resize(cols, rows)
+        @process.resize(cols, rows)
+
+    # Public: returns the parent panel {PanelView}
+    getParent: ->
+        return $(@parent()[0])
+
+    # Public: returns an object that can be retrieved when package is activated
     serialize: ->
 
     # Tear down any state and detach
