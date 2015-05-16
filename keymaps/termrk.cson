@@ -9,3 +9,6 @@
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
 'atom-workspace':
     'alt-space': 'termrk:toggle'
+
+'termrk':
+    'escape': 'termrk:toggle'

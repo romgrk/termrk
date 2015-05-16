@@ -1,24 +1,45 @@
 
-TermrkView            = require './termrk-view'
+
 {CompositeDisposable} = require 'atom'
 
+TermrkView = require './termrk-view'
+
+
 module.exports = Termrk =
+
     termrkView: null
-    modalPanel: null
+    panel: null
     subscriptions: null
 
-    activate: (state) ->
-        @termrkView = new TermrkView(state.termrkViewState)
-        @modalPanel = atom.workspace.addModalPanel(item: @termrkView.getElement(), visible: false)
+    activeTerminal: null
+    terminals: []
 
-        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+    activate: (state) ->
         @subscriptions = new CompositeDisposable
 
-        # Register command that toggles this view
-        @subscriptions.add atom.commands.add 'atom-workspace', 'termrk:toggle': => @toggle()
+        @subscriptions.add atom.commands.add 'atom-workspace',
+            'termrk:toggle': => @toggle()
+
+        @panel = atom.workspace.addBottomPanel(
+            item: @getActiveTerminal().getElement()
+            visible: false )
+        @panelView = atom.views.getView(@panel)
+
+        window.termrk = @
+
+    createTerminal: () ->
+        termrkView = new TermrkView()
+        @terminals.push termrkView
+        return termrkView
+
+    getActiveTerminal: ->
+        @activeTerminal ?= @createTerminal()
+
+    setActiveTerminal: (term) ->
+        @activeTerminal = term
 
     deactivate: ->
-        @modalPanel.destroy()
+        @panel.destroy()
         @subscriptions.dispose()
         @termrkView.destroy()
 
@@ -28,7 +49,8 @@ module.exports = Termrk =
     toggle: ->
         console.log 'Termrk was toggled!'
 
-        if @modalPanel.isVisible()
-            @modalPanel.hide()
+        if @panel.isVisible()
+            @panel.hide()
         else
-            @modalPanel.show()
+            @panel.show()
+            @panelView.height @getActiveTerminal.getTerminalElement().height()
