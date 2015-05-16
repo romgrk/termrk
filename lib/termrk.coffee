@@ -1,6 +1,7 @@
 
 
 {CompositeDisposable} = require 'atom'
+{$, $$, View}         = require 'space-pen'
 
 TermrkView = require './termrk-view'
 
@@ -23,8 +24,12 @@ module.exports = Termrk =
         @panel = atom.workspace.addBottomPanel(
             item: @getActiveTerminal().getElement()
             visible: false )
-        @panelView = atom.views.getView(@panel)
+        @$panel = $(atom.views.getView(@panel))
 
+        @$panel.height '400px'
+        console.log @$panel
+
+        @$ = $
         window.termrk = @
 
     createTerminal: () ->
@@ -53,4 +58,3 @@ module.exports = Termrk =
             @panel.hide()
         else
             @panel.show()
-            @panelView.height @getActiveTerminal.getTerminalElement().height()

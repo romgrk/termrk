@@ -10,5 +10,5 @@
 'atom-workspace':
     'alt-space': 'termrk:toggle'
 
-'termrk':
+'.termrk':
     'escape': 'termrk:toggle'
