@@ -16,7 +16,10 @@ class TermrkView extends View
     process: null
 
     @content: ->
-        @div class: 'termrk'
+        @div class: 'termrk', =>
+            @span class: 'pid-label', outlet: 'pidLabel'
+            # @div class: 'terminal'
+
 
     initialize: (serializedState) ->
         @spawnProcess()
@@ -24,10 +27,26 @@ class TermrkView extends View
             console.error "Termrk: aborting initialization"
             return
 
+        @time = Date.now()
+
+        @pidLabel.text @process.pid
+
+        @on 'keydown', (event) =>
+            if event.which == 13
+                console.log 'escape'
+                @blur()
+
+    activated: ->
+        @updateTerminalSize()
+        @pidLabel.addClass 'hidden'
+
+    deactivated: ->
+        @pidLabel.removeClass 'hidden'
+
     spawnProcess: ->
         shell = process.env.SHELL || process.env.TERM || 'sh'
         options =
-                name: 'xterm-color'
+                name: 'xterm-256color'
                 cols: 80
                 rows: 24
                 cwd: process.cwd()
@@ -56,15 +75,15 @@ class TermrkView extends View
         @terminal.on 'data', (data) =>
             @process.write(data)
 
-    animatedShow: ->
-        @show()
-        Q.fcall(=> @animate({height: '100%'}, 250).promise())
-        .then(-> console.log 'showed')
+    animatedShow: (cb) ->
+        @animate {height: '400px'}, 250, =>
+            console.log 'showed ' + @process.pid
+            cb?()
 
-    animatedHide: ->
-        Q.fcall(=> @animate({height: '0'}, 250).promise())
-        .then(=> @hide())
-        .then(-> console.log 'hidden')
+    animatedHide: (cb) ->
+        @animate {height: '0'}, 250, =>
+            console.log 'hidden ' + @process.pid
+            cb?()
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
@@ -74,13 +93,14 @@ class TermrkView extends View
             useStyle: true
             screenKeys: true
 
-        @terminal.open(@element);
+        @terminal.open @element
 
-        @terminalView = $(@element).find('.terminal')
+        @terminalView = @find('.terminal')
 
     # Public: update the terminal cols/rows based on the panel size
     updateTerminalSize: ->
-        dimensions = [@getParent().width(), @getParent().height()]
+        parent = @getParent()
+        dimensions = [parent.width(), parent.height()]
 
         font       = @terminalView.css('font')
         fontWidth  = Font.getWidth("a", font)
@@ -100,6 +120,10 @@ class TermrkView extends View
     # Public: returns the parent panel {PanelView}
     getParent: ->
         return $(@parent()[0])
+
+    # Public: returns the PID of the running process
+    getPID: ->
+        @process.pid
 
     # Public: returns an object that can be retrieved when package is activated
     serialize: ->

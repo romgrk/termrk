@@ -1,8 +1,10 @@
 
 # in workspace
 'atom-workspace':
-    'alt-space':      'termrk:toggle'
-    'ctrl-alt-space': 'termrk:create-terminal'
+    'alt-space':        'termrk:toggle'
+    'ctrl-alt-space c': 'termrk:create-terminal'
+    'ctrl-alt-space n': 'termrk:activate-next-terminal'
+    'ctrl-alt-space p': 'termrk:activate-previous-terminal'
 
 # in termrk view
 '.termrk':

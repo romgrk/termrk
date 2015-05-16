@@ -1,9 +1,30 @@
 // @import "ui-variables";
 
 .termrk {
+    position: relative;
+    height: 0;
+
+    .container {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .pid-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        color: white;
+        background-color: red;
+        opacity: 1;
+        &.hidden {
+            transition: opacity 5s ease 2s;
+            opacity: 0;
+        }
+    }
 
     .terminal {
         font-family: "Monospace";
-        float: none;
+        float: none !important;
     }
 }
