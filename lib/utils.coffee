@@ -1,6 +1,13 @@
 
 {$, $$, View} = require 'space-pen'
 
+Config =
+    get: (k) ->
+        return atom.config.get "termrk." + k
+
+    set: (k, v) ->
+        return atom.config.set "termrk." + k, v
+
 Font =
     # Public: get the width of the text with specified font
     getWidth: (text, font) ->
@@ -36,4 +43,4 @@ Font =
 
         return h
 
-module.exports = {Font}
+module.exports = {Font, Config}

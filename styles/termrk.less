@@ -27,18 +27,21 @@
         color:            white;
         background-color: red;
         opacity:          0.8;
-        transition:       opacity .3s;
+        transition:       opacity .5s;
         &.fade-out {
             opacity:    0;
-            transition: opacity 4s ease 1s;
+            transition: opacity 2s ease 1s;
         }
     }
 
     .terminal {
-        overflow-y: auto;
-        font-family: "Monospace";
-        font-size: 14px;
         float: none !important;
         border: none;
+
+        overflow-y: auto;
+
+        line-height: 1em;
+        font-size: 14px;
+        font-family: "Monospace";
     }
 }

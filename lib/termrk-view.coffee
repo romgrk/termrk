@@ -8,8 +8,8 @@ $                     = require 'jquery.transit'
 pty        = require('pty.js')
 {Terminal} = require('term.js')
 
-Termrk = require './termrk'
-{Font} = require './utils'
+Termrk         = require './termrk'
+{Font, Config} = require './utils'
 
 module.exports =
 class TermrkView extends View
@@ -111,6 +111,17 @@ class TermrkView extends View
                 @blur()
             else
                 console.log 'keydown', event.which
+
+    # Private: spy on terminal's keydown function to be abble to
+    # get keystrokes
+    observeTerminalKeydown: ->
+        originalKeydown = @terminal.keyDown
+
+        newKeydown = (event) ->
+            console.log (event.which)
+            originalKeydown()
+
+        @terminal.keyDown = newKeydown
 
     # Public: update the terminal cols/rows based on the panel size
     updateTerminalSize: ->

@@ -5,7 +5,7 @@
 $                     = require 'jquery.transit'
 
 TermrkView = require './termrk-view'
-{Font}     = require './utils'
+{Font, Config} = require './utils'
 
 
 module.exports = Termrk =
@@ -40,8 +40,9 @@ module.exports = Termrk =
             item: @container
             visible: false )
 
-        @panelView = $(atom.views.getView(@panel))
-        @panelHeight = atom.config.get('termrk.defaultHeight')
+        @panelHeight = Config.get('defaultHeight')
+        
+        @panelView   = $(atom.views.getView(@panel))
         @panelView.height(@panelHeight)
 
         @containerView = $(@panelView.find('.termrk-container'))
