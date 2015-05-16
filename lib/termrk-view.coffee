@@ -62,6 +62,8 @@ class TermrkView extends View
 
         @terminal.open(@element);
 
+        @terminalView = $(@element).find('.terminal')
+
     # Returns an object that can be retrieved when package is activated
     serialize: ->
 

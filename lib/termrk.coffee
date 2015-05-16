@@ -4,6 +4,7 @@
 {$, $$, View}         = require 'space-pen'
 
 TermrkView = require './termrk-view'
+{Font} = require './utils'
 
 
 module.exports = Termrk =
@@ -44,9 +45,10 @@ module.exports = Termrk =
         @activeTerminal = term
 
     deactivate: ->
+        for term in @terminals
+            term.destroy()
         @panel.destroy()
         @subscriptions.dispose()
-        @termrkView.destroy()
 
     serialize: ->
         termrkViewState: @termrkView.serialize()
@@ -56,4 +58,11 @@ module.exports = Termrk =
             @panel.hide()
         else
             @panel.show()
-            console.log @panelView.width(), "x", @panelView.height()
+
+            dimensions = [@panelView.width(), @panelView.height()]
+            font       = @activeTerminal.terminalView.css('font')
+            fontWidth  = Font.getWidth("a", font)
+            fontHeight = Font.getHeight("a", font)
+
+            cols = dimensions[0] / fontWidth
+            rows = dimensions[1] / fontHeight
