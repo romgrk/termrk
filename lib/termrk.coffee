@@ -24,10 +24,10 @@ module.exports = Termrk =
         @panel = atom.workspace.addBottomPanel(
             item: @getActiveTerminal().getElement()
             visible: false )
-        @$panel = $(atom.views.getView(@panel))
+        @panelView = $(atom.views.getView(@panel))
 
-        @$panel.height '400px'
-        console.log @$panel
+        @panelView.height '400px'
+        console.log @panelView
 
         @$ = $
         window.termrk = @
@@ -52,9 +52,8 @@ module.exports = Termrk =
         termrkViewState: @termrkView.serialize()
 
     toggle: ->
-        console.log 'Termrk was toggled!'
-
         if @panel.isVisible()
             @panel.hide()
         else
             @panel.show()
+            console.log @panelView.width(), "x", @panelView.height()

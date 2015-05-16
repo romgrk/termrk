@@ -31,9 +31,8 @@ class TermrkView extends View
 
         try
             @process = pty.fork(shell, [], options)
-            console.log(
-                "Termrk: started process #{shell} with pid:#{@process.pid}"
-                + "and fd:#{@process.fd}");
+            console.log "Termrk: started process #{shell}"
+            console.log "pid:#{@process.pid} and fd:#{@process.fd}"
         catch error
             console.error("Termrk: couldn't start process "
                 + "#{shell} with pid:#{@process.pid}")
