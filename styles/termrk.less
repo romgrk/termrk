@@ -1,8 +1,18 @@
 // @import "ui-variables";
 
+.termrk-container {
+    width:            100%;
+    height:           100%;
+    border-left:      5px solid black;
+    border-right:     5px solid black;
+    background-color: black;
+}
+
 .termrk {
     position: relative;
     height: 0;
+    overflow-y: auto;
+    overflow-x: auto;
 
     .container {
         display: inline-block;
@@ -11,20 +21,24 @@
     }
 
     .pid-label {
-        position: absolute;
-        top: 0;
-        right: 0;
-        color: white;
+        position:         absolute;
+        top:              0;
+        right:            20px;
+        color:            white;
         background-color: red;
-        opacity: 1;
-        &.hidden {
-            transition: opacity 5s ease 2s;
-            opacity: 0;
+        opacity:          0.8;
+        transition:       opacity .3s;
+        &.fade-out {
+            opacity:    0;
+            transition: opacity 4s ease 1s;
         }
     }
 
     .terminal {
+        overflow-y: auto;
         font-family: "Monospace";
+        font-size: 14px;
         float: none !important;
+        border: none;
     }
 }

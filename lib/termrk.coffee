@@ -1,18 +1,20 @@
 
 
 {CompositeDisposable} = require 'atom'
-{$, $$, View}         = require 'space-pen'
+{$$, View}            = require 'space-pen'
+$                     = require 'jquery.transit'
 
 TermrkView = require './termrk-view'
-{Font} = require './utils'
+{Font}     = require './utils'
 
 
 module.exports = Termrk =
 
     container: null
 
-    panel:     null
-    panelView: null
+    panel:       null
+    panelView:   null
+    panelHeight: null
 
     subscriptions: null
 
@@ -23,7 +25,11 @@ module.exports = Termrk =
         'defaultHeight':
             description: 'Default height of the terminal-panel'
             type: 'integer'
-            default: 400
+            default: 300
+        'shellCommand':
+            description: 'Command to call to start the shell. (auto-detect by default)'
+            type: 'string'
+            default: 'auto'
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
@@ -35,21 +41,21 @@ module.exports = Termrk =
             visible: false )
 
         @panelView = $(atom.views.getView(@panel))
-        @panelView.height '400px'
-
-        console.log atom.config.get('termrk.defaultHeight')
+        @panelHeight = atom.config.get('termrk.defaultHeight')
+        @panelView.height(@panelHeight)
 
         @containerView = $(@panelView.find('.termrk-container'))
 
         @subscriptions.add atom.commands.add 'atom-workspace',
             'termrk:toggle':            => @toggle()
-            'termrk:create-terminal':   => @createTerminal()
+            'termrk:create-terminal':   => @setActiveTerminal(@createTerminal())
             'termrk:activate-next-terminal':   =>
                 @setActiveTerminal(@getNextTerminal())
             'termrk:activate-previous-terminal':   =>
                 @setActiveTerminal(@getPreviousTerminal())
 
-        @createTerminal()
+        @setActiveTerminal(@createTerminal())
+
         @activeTerminal.updateTerminalSize()
 
         @$ = $
@@ -67,35 +73,49 @@ module.exports = Termrk =
 
         @containerView.append termrkView
 
-        @setActiveTerminal(termrkView)
         return termrkView
 
     getPreviousTerminal: ->
-        return unless @activeTerminal?
-
         keys  = Object.keys(@terminals).sort()
-        index = keys.indexOf @activeTerminal.time
-        return null if index == -1
 
+        unless @activeTerminal?
+            return null if keys.length is 0
+            return @terminals[keys[0]]
+
+        index = keys.indexOf @activeTerminal.time
         index = if index is 0 then (keys.length - 1) else (index - 1)
         key   = keys[index]
+
+        console.log 'keys', keys
+        console.log 'active', @activeTerminal.time
+        console.log 'index %i', index
+
         return @terminals[key]
 
     getNextTerminal: ->
-        return unless @activeTerminal?
-
         keys  = Object.keys(@terminals).sort()
-        index = keys.indexOf @activeTerminal.time
-        return null if index == -1
 
+        unless @activeTerminal?
+            return null if keys.length is 0
+            return @terminals[keys[0]]
+
+        index = keys.indexOf @activeTerminal.time
         index = (index + 1) % keys.length
         key   = keys[index]
+
+        console.log 'keys', keys
+        console.log 'active', @activeTerminal.time
+        console.log 'index %i', index
+
         return @terminals[key]
 
     getActiveTerminal: ->
-        @activeTerminal ?= @createTerminal()
+        return @activeTerminal if @activeTerminal?
+        @setActiveTerminal(@createTerminal())
+        return @activeTerminal
 
     setActiveTerminal: (term) ->
+        console.log 'set active:', term
         return if term is @activeTerminal
         @activeTerminal?.animatedHide()
         @activeTerminal?.deactivated()
@@ -116,6 +136,9 @@ module.exports = Termrk =
 
         delete @terminals[term.time]
 
+    getPanelHeight: ->
+        @panelHeight
+
     deactivate: ->
         for time, term of @terminals
             term.destroy()
@@ -127,7 +150,19 @@ module.exports = Termrk =
 
     toggle: ->
         if @panel.isVisible()
-            @panel.hide()
+            @panelHeight = @panelView.height()
+            @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
+                @panel.hide()
+                @activeTerminal.deactivated()
+                @restoreFocus()
         else
+            @storeFocusedElement()
             @panel.show()
-            @activeTerminal.activated()
+            @panelView.transition {height: @panelHeight}, 250, 'ease-in-out', =>
+                @activeTerminal.activated()
+
+    storeFocusedElement: ->
+        @focusedElement = document.activeElement
+
+    restoreFocus: ->
+        @focusedElement?.focus()

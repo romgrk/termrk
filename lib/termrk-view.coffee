@@ -2,11 +2,13 @@
 Q = require 'q'
 
 {CompositeDisposable} = require 'atom'
-{$, $$, View}         = require 'space-pen'
+{$$, View}            = require 'space-pen'
+$                     = require 'jquery.transit'
 
 pty        = require('pty.js')
 {Terminal} = require('term.js')
 
+Termrk = require './termrk'
 {Font} = require './utils'
 
 module.exports =
@@ -14,6 +16,11 @@ class TermrkView extends View
 
     # Public: {Child_process} process of the running shell
     process: null
+
+    time: null
+
+    terminal:     null
+    terminalView: null
 
     @content: ->
         @div class: 'termrk', =>
@@ -27,22 +34,20 @@ class TermrkView extends View
             console.error "Termrk: aborting initialization"
             return
 
-        @time = Date.now()
+        @time = "" + Date.now()
 
         @pidLabel.text @process.pid
 
-        @on 'keydown', (event) =>
-            if event.which == 13
-                console.log 'escape'
-                @blur()
-
     activated: ->
         @updateTerminalSize()
-        @pidLabel.addClass 'hidden'
+        @terminalView.focus()
+        @pidLabel.addClass 'fade-out'
 
     deactivated: ->
-        @pidLabel.removeClass 'hidden'
+        @pidLabel.removeClass 'fade-out'
+        @terminalView.blur()
 
+    # Public: spawns the shell process
     spawnProcess: ->
         shell = process.env.SHELL || process.env.TERM || 'sh'
         options =
@@ -70,13 +75,17 @@ class TermrkView extends View
         @process.on 'exit', (code, signal) =>
             console.log "Termrk process: exit(%i) and signal %s",
                 code, signal
+            delete @process
+            @terminal.write('Process terminated. Restarting.')
             @spawnProcess()
 
         @terminal.on 'data', (data) =>
             @process.write(data)
 
+        return
+
     animatedShow: (cb) ->
-        @animate {height: '400px'}, 250, =>
+        @animate {height: @getPanelHeight()}, 250, =>
             console.log 'showed ' + @process.pid
             cb?()
 
@@ -96,23 +105,30 @@ class TermrkView extends View
         @terminal.open @element
 
         @terminalView = @find('.terminal')
+        @terminalView.on 'keydown', (event) =>
+            if event.which == 27
+                console.log 'escape'
+                @blur()
+            else
+                console.log 'keydown', event.which
 
     # Public: update the terminal cols/rows based on the panel size
     updateTerminalSize: ->
         parent = @getParent()
-        dimensions = [parent.width(), parent.height()]
+        width  = parent.width()
+        height = @getPanelHeight()
 
         font       = @terminalView.css('font')
         fontWidth  = Font.getWidth("a", font)
         fontHeight = Font.getHeight("a", font)
 
-        cols = Math.floor(dimensions[0] / fontWidth)
-        rows = Math.floor(dimensions[1] / fontHeight)
+        cols = Math.floor(width / fontWidth)
+        rows = Math.floor(height / fontHeight)
 
-        console.log dimensions
-        console.log font
-        console.log fontWidth, fontHeight
-        console.log cols, rows
+        console.log 'panel: ', width, height
+        console.log 'terminal: ', cols, rows
+        # console.log font
+        # console.log fontWidth, fontHeight
 
         @terminal.resize(cols, rows)
         @process.resize(cols, rows)
@@ -120,6 +136,11 @@ class TermrkView extends View
     # Public: returns the parent panel {PanelView}
     getParent: ->
         return $(@parent()[0])
+
+    getPanelHeight: ->
+        console.log Termrk
+        console.log require('./termrk')
+        return require('./termrk').getPanelHeight()
 
     # Public: returns the PID of the running process
     getPID: ->
