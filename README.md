@@ -55,5 +55,5 @@ The example below illustrates *vim* running on **termrk**.
 [pty]:  https://github.com/chjj/pty.js
 
 
-[basic]: static/out.gif
-[vim]:   static/vim.gif
+[basic]: http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif
+[vim]:   http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif

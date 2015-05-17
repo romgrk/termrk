@@ -2,7 +2,7 @@
   "name": "Termrk",
   "main": "./lib/termrk",
   "version": "0.1.0",
-  "description": "A short description of your package",
+  "description": "Terminal panel inside Atom",
   "activationCommands": {
     "atom-workspace": "termrk:toggle"
   },
@@ -11,6 +11,12 @@
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
   },
+  "keywords": [
+      "terminal",
+      "shell",
+      "bash",
+      "sh"
+  ],
   "dependencies": {
     "jquery": "^2.1.4",
     "jquery.transit": "^0.9.12",
