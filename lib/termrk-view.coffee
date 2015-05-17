@@ -1,15 +1,19 @@
 
 Q = require 'q'
+$ = require 'jquery.transit'
 
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
-$                     = require 'jquery.transit'
+{Key, KeyKit}         = require 'keykit'
 
 pty        = require('pty.js')
 {Terminal} = require('term.js')
+window.Terminal = Terminal
 
-Termrk         = require './termrk'
 {Font, Config} = require './utils'
+
+# Will be assigned to main module
+Termrk = null
 
 module.exports =
 class TermrkView extends View
@@ -25,10 +29,12 @@ class TermrkView extends View
     @content: ->
         @div class: 'termrk', =>
             @span class: 'pid-label', outlet: 'pidLabel'
-            # @div class: 'terminal'
+            # @div class: 'terminal' # <= created by term.js
 
 
     initialize: (serializedState) ->
+        Termrk = atom.packages.getLoadedPackage('termrk')
+
         @spawnProcess()
         unless @process?
             console.error "Termrk: aborting initialization"
@@ -38,11 +44,13 @@ class TermrkView extends View
 
         @pidLabel.text @process.pid
 
+    # Public: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
         @terminalView.focus()
         @pidLabel.addClass 'fade-out'
 
+    # Public: called after this terminal view has been deactivated
     deactivated: ->
         @pidLabel.removeClass 'fade-out'
         @terminalView.blur()
@@ -84,11 +92,13 @@ class TermrkView extends View
 
         return
 
+    # Public: animate height to 0px.
     animatedShow: (cb) ->
         @animate {height: @getPanelHeight()}, 250, =>
             console.log 'showed ' + @process.pid
             cb?()
 
+    # Public: animate height to fill the container.
     animatedHide: (cb) ->
         @animate {height: '0'}, 250, =>
             console.log 'hidden ' + @process.pid
@@ -103,25 +113,71 @@ class TermrkView extends View
             screenKeys: true
 
         @terminal.open @element
-
         @terminalView = @find('.terminal')
-        @terminalView.on 'keydown', (event) =>
-            if event.which == 27
-                console.log 'escape'
-                @blur()
-            else
-                console.log 'keydown', event.which
 
-    # Private: spy on terminal's keydown function to be abble to
+        @observeTerminalKeydown()
+
+    # Private: spy on terminal's keyEvent function to be abble to
     # get keystrokes
     observeTerminalKeydown: ->
-        originalKeydown = @terminal.keyDown
+        # @originalTerminalKeydown = @terminal.keyDown.bind(@terminal)
+        @terminal.originalKeyDown  = @terminal.keyDown
+        @terminal.originalKeyPress = @terminal.keyPress
+        @terminal.originalKeyUp    = @terminal.keyUp
 
-        newKeydown = (event) ->
-            console.log (event.which)
-            originalKeydown()
+        @terminal.keyDown  = @onTerminalKeydown.bind(@)
+        @terminal.keyPress = @onTerminalKeydown.bind(@)
+        @terminal.keyUp    = @onTerminalKeydown.bind(@)
 
-        @terminal.keyDown = newKeydown
+    # Private: called whenever a key is pressed on the terminal, before
+    # the terminal receives it
+    onTerminalKeydown: (event) =>
+        Termrk = require('./termrk')
+
+        keystroke = KeyKit.fromKBEvent(event).toString()
+        unfocusKeystroke = Config.get('unfocusKeystroke')
+
+        console.log 'termrk:key ', keystroke
+
+        switch keystroke
+            when unfocusKeystroke # escape by default
+                @dispatchCommand('hide')
+                return
+            when 'ctrl-n'
+                @dispatchCommand('create-terminal')
+                return
+            when 'ctrl-escape'
+                event = KeyKit.createKBEvent(event.type, 'escape')
+            when 'alt-escape'
+                @dispatchCommand('activate-next-terminal')
+                return
+            when 'alt-shift-escape'
+                @dispatchCommand('activate-previous-terminal')
+                return
+
+        if event.type is 'keypress'
+            @terminal.originalKeyPress(event)
+        if event.type is 'keydown'
+            @terminal.originalKeyDown(event)
+        if event.type is 'keyup'
+            @terminal.originalKeyUp(event)
+
+        return
+
+    # Public: dispatches the command `name` on element
+    #
+    # `name` - {String} command to dispatch
+    #           if `name` doesn't contains '.', 'termrk.' is prepended
+    #
+    # Returns nothing.
+    dispatchCommand: (name) ->
+        unless name.match /\./
+            name = "termrk." + name
+        atom.commands.dispatch(
+            @element,
+            # document.querySelector('atom-workspace'),
+            name)
+        console.log 'termrk:dispatched ' + name
 
     # Public: update the terminal cols/rows based on the panel size
     updateTerminalSize: ->
@@ -150,7 +206,6 @@ class TermrkView extends View
 
     getPanelHeight: ->
         console.log Termrk
-        console.log require('./termrk')
         return require('./termrk').getPanelHeight()
 
     # Public: returns the PID of the running process

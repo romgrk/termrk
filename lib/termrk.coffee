@@ -10,26 +10,36 @@ TermrkView = require './termrk-view'
 
 module.exports = Termrk =
 
-    container: null
+    # Public: panel's children and jQuery wrapper
+    container:     null
+    containerView: null
 
+    # Public: panel model, jQ wrapper and default height
     panel:       null
     panelView:   null
     panelHeight: null
 
+    # Public: {CompositeDisposable}
     subscriptions: null
 
-    activeTerminal: null
+    # Public: {TerminalView} list and active view
     terminals:      {}
+    activeTerminal: null
 
+    # Private: config description
     config:
         'defaultHeight':
             description: 'Default height of the terminal-panel'
-            type: 'integer'
-            default: 300
+            type:        'integer'
+            default:     300
         'shellCommand':
             description: 'Command to call to start the shell. (auto-detect by default)'
-            type: 'string'
-            default: 'auto'
+            type:        'string'
+            default:     'auto'
+        'unfocusKeystroke':
+            description: 'KeyStroke that hides the terminal when it is focused. (atom keymap format)'
+            type:        'string'
+            default:     'escape'
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
@@ -41,19 +51,26 @@ module.exports = Termrk =
             visible: false )
 
         @panelHeight = Config.get('defaultHeight')
-        
-        @panelView   = $(atom.views.getView(@panel))
+
+        @panelView = $(atom.views.getView(@panel))
         @panelView.height(@panelHeight)
+        @panelView.addClass 'termrk-panel'
+        @panelView.on 'resize', ->
+            console.log 'panel resize'
 
         @containerView = $(@panelView.find('.termrk-container'))
+        @containerView.on 'resize', ->
+            console.log 'container resize'
 
-        @subscriptions.add atom.commands.add 'atom-workspace',
+        @workspaceCommands =
             'termrk:toggle':            => @toggle()
+            'termrk:hide':              => @hide()
+            'termrk:show':              => @show()
             'termrk:create-terminal':   => @setActiveTerminal(@createTerminal())
-            'termrk:activate-next-terminal':   =>
-                @setActiveTerminal(@getNextTerminal())
-            'termrk:activate-previous-terminal':   =>
-                @setActiveTerminal(@getPreviousTerminal())
+            'termrk:activate-next-terminal':   => @setActiveTerminal(@getNextTerminal())
+            'termrk:activate-previous-terminal':   => @setActiveTerminal(@getPreviousTerminal())
+
+        @subscriptions.add atom.commands.add 'atom-workspace', @workspaceCommands
 
         @setActiveTerminal(@createTerminal())
 
@@ -61,6 +78,10 @@ module.exports = Termrk =
 
         @$ = $
         window.termrk = @
+
+    ###
+    Section: elements/views creation
+    ###
 
     createContainer: ->
         container = document.createElement('div')
@@ -75,6 +96,10 @@ module.exports = Termrk =
         @containerView.append termrkView
 
         return termrkView
+
+    ###
+    Section: terminals management
+    ###
 
     getPreviousTerminal: ->
         keys  = Object.keys(@terminals).sort()
@@ -137,8 +162,43 @@ module.exports = Termrk =
 
         delete @terminals[term.time]
 
+    ###
+    Section: commands handlers
+    ###
+
+    hide: ->
+        return unless @panel.isVisible()
+        @panelHeight = @panelView.height()
+        @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
+            @panel.hide()
+            @activeTerminal.deactivated()
+            @restoreFocus()
+
+    show: ->
+        return if @panel.isVisible()
+        @storeFocusedElement()
+        @panel.show()
+        @panelView.transition {height: @panelHeight}, 250, 'ease-in-out', =>
+            @activeTerminal.activated()
+
+    toggle: ->
+        if @panel.isVisible()
+            @hide()
+        else
+            @show()
+
+    ###
+    Section: helpers
+    ###
+
     getPanelHeight: ->
         @panelHeight
+
+    storeFocusedElement: ->
+        @focusedElement = document.activeElement
+
+    restoreFocus: ->
+        @focusedElement?.focus()
 
     deactivate: ->
         for time, term of @terminals
@@ -148,22 +208,3 @@ module.exports = Termrk =
 
     serialize: ->
         termrkViewState: @termrkView.serialize()
-
-    toggle: ->
-        if @panel.isVisible()
-            @panelHeight = @panelView.height()
-            @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
-                @panel.hide()
-                @activeTerminal.deactivated()
-                @restoreFocus()
-        else
-            @storeFocusedElement()
-            @panel.show()
-            @panelView.transition {height: @panelHeight}, 250, 'ease-in-out', =>
-                @activeTerminal.activated()
-
-    storeFocusedElement: ->
-        @focusedElement = document.activeElement
-
-    restoreFocus: ->
-        @focusedElement?.focus()
