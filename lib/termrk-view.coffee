@@ -143,15 +143,15 @@ class TermrkView extends View
             when unfocusKeystroke # escape by default
                 @dispatchCommand('hide')
                 return
-            when 'ctrl-n'
+            when 'ctrl-space'
                 @dispatchCommand('create-terminal')
                 return
             when 'ctrl-escape'
                 event = KeyKit.createKBEvent(event.type, 'escape')
-            when 'alt-escape'
+            when 'ctrl-tab'
                 @dispatchCommand('activate-next-terminal')
                 return
-            when 'alt-shift-escape'
+            when 'ctrl-shift-tab'
                 @dispatchCommand('activate-previous-terminal')
                 return
 
