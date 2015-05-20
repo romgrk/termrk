@@ -114,6 +114,8 @@ class TermrkView extends View
 
         @terminal.open @element
         @terminalView = @find('.terminal')
+        @terminalView.removeClass 'terminal'
+        @terminalView.addClass 'termjs-terminal'
 
         @observeTerminalKeydown()
 
