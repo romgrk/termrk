@@ -10,7 +10,13 @@ The example below illustrates **termrk** running *zsh*. (see *vim* demo at the e
 ![Basic demo of termrk][basic]
 
 ## Install
+Due to a highly platform variable dependency, the following issues can arise.
 
+#### Python error
+If you get a **Python** error, it probably is because the `python` in your path
+is a 3.x version of python. Please make sure your path refers to a 2.7 version of python.
+
+#### Build error for term.js
 You might need to rebuild the term.js/pty.js modules. It is very simple.
 ```
 cd $ATOM_HOME/packages/termrk
@@ -24,7 +30,7 @@ Because of the way term.js handles keystrokes, some keybindings aren't listed in
 #### workspace
 - `alt-space` : toggle terminal panel
 
-#### inside terminal
+#### inside terminal (might be broken)
 
 - `escape` : hide terminal panel
 - `ctrl-space` : create terminal
