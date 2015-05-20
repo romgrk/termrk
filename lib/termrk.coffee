@@ -29,7 +29,7 @@ module.exports = Termrk =
     # Private: config description
     config:
         'defaultHeight':
-            description: 'Default height of the terminal-panel'
+            description: 'Default height of the terminal-panel (in px)'
             type:        'integer'
             default:     300
         'shellCommand':
@@ -51,9 +51,11 @@ module.exports = Termrk =
             visible: false )
 
         @panelHeight = Config.get('defaultHeight')
+        if not @panelHeight? or typeof @panelHeight isnt "number"
+            @panelHeight = 300
 
         @panelView = $(atom.views.getView(@panel))
-        @panelView.height(@panelHeight)
+        @panelView.height(@panelHeight + 'px')
         @panelView.addClass 'termrk-panel'
         @panelView.on 'resize', ->
             console.log 'panel resize'
