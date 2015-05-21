@@ -92,6 +92,7 @@ module.exports = Termrk =
 
     createTerminal: () ->
         termrkView = new TermrkView()
+        termrkView.height(0)
 
         @terminals[termrkView.time] = termrkView
 
