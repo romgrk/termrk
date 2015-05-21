@@ -1,14 +1,14 @@
 
-Q = require 'q'
-$ = require 'jquery.transit'
+Q   = require 'q'
+$   = require 'jquery.transit'
+pty = require('pty.js')
 
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
+{Terminal}            = require 'term.js'
 
-pty        = require('pty.js')
-{Terminal} = require('term.js')
-window.Terminal = Terminal
+window.termjs = require 'term.js' if window.debug?
 
 {Font, Config} = require './utils'
 
@@ -129,47 +129,61 @@ class TermrkView extends View
         # @originalTerminalKeydown = @terminal.keyDown.bind(@terminal)
         @terminal.originalKeyDown  = @terminal.keyDown
         @terminal.originalKeyPress = @terminal.keyPress
-        @terminal.originalKeyUp    = @terminal.keyUp
 
-        @terminal.keyDown  = @onTerminalKeydown.bind(@)
-        @terminal.keyPress = @onTerminalKeydown.bind(@)
-        @terminal.keyUp    = @onTerminalKeydown.bind(@)
+        @terminal.keyDown  = @onTerminalKeyEvent.bind(@)
+        @terminal.keyPress = @onTerminalKeyEvent.bind(@)
 
     # Private: called whenever a key is pressed on the terminal, before
     # the terminal receives it
-    onTerminalKeydown: (event) =>
+    onTerminalKeyEvent: (event) =>
         Termrk = require('./termrk')
 
         keystroke = KeyKit.fromKBEvent(event).toString()
         unfocusKeystroke = Config.get('unfocusKeystroke')
 
-        if window.debug?
-            console.log 'termrk:key ', keystroke
+        msg = 'termrk:key '
+        msg +=  keystroke + '\t' + event.type
+
+        isKeybinding = false
 
         switch keystroke
             when unfocusKeystroke # escape by default
                 # @dispatchCommand('hide')
+                msg += '(hide)'
+                isKeybinding = true
                 return
             when 'ctrl-space'
                 # @dispatchCommand('create-terminal')
+                msg += '(create)'
+                isKeybinding = true
                 return
             when 'ctrl-escape'
+                msg += '(esc)'
                 event.ctrlKey = false
             when 'ctrl-tab'
                 # @dispatchCommand('activate-next-terminal')
+                msg += '(next)'
+                isKeybinding = true
                 return
             when 'ctrl-shift-tab'
                 # @dispatchCommand('activate-previous-terminal')
+                msg += '(previous)'
+                isKeybinding = true
                 return
 
-        if event.type is 'keypress'
+        cancelled = not if isKeybinding
+            true
+        else if event.type is 'keypress'
             @terminal.originalKeyPress(event)
-        if event.type is 'keydown'
+        else if event.type is 'keydown'
             @terminal.originalKeyDown(event)
-        if event.type is 'keyup'
-            @terminal.originalKeyUp(event)
 
-        return
+        @terminal.element.focus()
+
+        if window.debug?
+            console.log msg, 'cc?', cancelled
+
+        return (not cancelled)
 
     # Public: dispatches the command `name` on element
     #
@@ -200,6 +214,7 @@ class TermrkView extends View
         rows = Math.floor(height / fontHeight)
 
         if window.debug?
+            console.log atom.keymap.findKeyBindings(target:@terminal.element)
             console.log 'panel: ', width, height
             console.log 'terminal: ', cols, rows
 
