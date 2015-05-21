@@ -25,10 +25,12 @@ apm rebuild
 
 ## Keybindings
 
-Because of the way term.js handles keystrokes, some keybindings aren't listed in the usual way.
+~~Because of the way term.js handles keystrokes, some keybindings aren't listed in the usual way.~~
+Keybindings work fine with the latest published patch, waiting for feedback.
 
 #### workspace
 - `alt-space` : toggle terminal panel
+- `ctrl-alt-space` : create terminal
 
 #### inside terminal (might be broken)
 
