@@ -35,6 +35,8 @@ class TermrkView extends View
     initialize: (serializedState) ->
         Termrk = atom.packages.getLoadedPackage('termrk')
 
+        @setupTerminalElement()
+
         @spawnProcess()
         unless @process?
             console.error "Termrk: aborting initialization"
@@ -74,9 +76,6 @@ class TermrkView extends View
             console.error error
             return
 
-        unless @terminal?
-            @setupTerminalElement()
-
         @process.on 'data', (data) =>
             @terminal.write data
 
@@ -106,6 +105,11 @@ class TermrkView extends View
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
+
+        # Clear term.js style injection.
+        if Terminal.insertStyle?
+            Terminal.insertStyle = () -> return
+
         @terminal = new Terminal
             cols: 80
             rows: 24
@@ -114,8 +118,6 @@ class TermrkView extends View
 
         @terminal.open @element
         @terminalView = @find('.terminal')
-        @terminalView.removeClass 'terminal'
-        @terminalView.addClass 'termjs-terminal'
 
         @observeTerminalKeydown()
 
