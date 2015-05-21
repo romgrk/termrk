@@ -1,10 +1,11 @@
 
 # in workspace
 'atom-workspace':
-    'alt-space':        'termrk:toggle'
+    'alt-space':      'termrk:toggle'
+    'ctrl-alt-space': 'termrk:create-terminal'
 
 # in termrk view
-'atom-panel.termrk-panel':
+'.termrk .terminal':
     'escape':         'termrk:hide'
     'ctrl-space':     'termrk:create-terminal'
     'ctrl-tab':       'termrk:activate-next-terminal'

@@ -58,11 +58,11 @@ module.exports = Termrk =
         @panelView.height(@panelHeight + 'px')
         @panelView.addClass 'termrk-panel'
         @panelView.on 'resize', ->
-            console.log 'panel resize'
+            console.log 'panel resize' if window.debug?
 
         @containerView = $(@panelView.find('.termrk-container'))
         @containerView.on 'resize', ->
-            console.log 'container resize'
+            console.log 'container resize' if window.debug?
 
         @workspaceCommands =
             'termrk:toggle':            => @toggle()
@@ -114,10 +114,6 @@ module.exports = Termrk =
         index = if index is 0 then (keys.length - 1) else (index - 1)
         key   = keys[index]
 
-        console.log 'keys', keys
-        console.log 'active', @activeTerminal.time
-        console.log 'index %i', index
-
         return @terminals[key]
 
     getNextTerminal: ->
@@ -131,10 +127,6 @@ module.exports = Termrk =
         index = (index + 1) % keys.length
         key   = keys[index]
 
-        console.log 'keys', keys
-        console.log 'active', @activeTerminal.time
-        console.log 'index %i', index
-
         return @terminals[key]
 
     getActiveTerminal: ->
@@ -143,7 +135,7 @@ module.exports = Termrk =
         return @activeTerminal
 
     setActiveTerminal: (term) ->
-        console.log 'set active:', term
+        console.log 'set active:', term if window.debug?
         return if term is @activeTerminal
         @activeTerminal?.animatedHide()
         @activeTerminal?.deactivated()

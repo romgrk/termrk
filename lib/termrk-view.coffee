@@ -94,13 +94,15 @@ class TermrkView extends View
     # Public: animate height to 0px.
     animatedShow: (cb) ->
         @animate {height: @getPanelHeight()}, 250, =>
-            console.log 'showed ' + @process.pid
+            if window.debug?
+                console.log 'showed ' + @process.pid
             cb?()
 
     # Public: animate height to fill the container.
     animatedHide: (cb) ->
         @animate {height: '0'}, 250, =>
-            console.log 'hidden ' + @process.pid
+            if window.debug?
+                console.log 'hidden ' + @process.pid
             cb?()
 
     # Private: initialize the {Terminal} (term.js)
@@ -141,22 +143,23 @@ class TermrkView extends View
         keystroke = KeyKit.fromKBEvent(event).toString()
         unfocusKeystroke = Config.get('unfocusKeystroke')
 
-        console.log 'termrk:key ', keystroke
+        if window.debug?
+            console.log 'termrk:key ', keystroke
 
         switch keystroke
             when unfocusKeystroke # escape by default
-                @dispatchCommand('hide')
+                # @dispatchCommand('hide')
                 return
             when 'ctrl-space'
-                @dispatchCommand('create-terminal')
+                # @dispatchCommand('create-terminal')
                 return
             when 'ctrl-escape'
-                event = KeyKit.createKBEvent(event.type, 'escape')
+                event.ctrlKey = false
             when 'ctrl-tab'
-                @dispatchCommand('activate-next-terminal')
+                # @dispatchCommand('activate-next-terminal')
                 return
             when 'ctrl-shift-tab'
-                @dispatchCommand('activate-previous-terminal')
+                # @dispatchCommand('activate-previous-terminal')
                 return
 
         if event.type is 'keypress'
@@ -176,7 +179,7 @@ class TermrkView extends View
     # Returns nothing.
     dispatchCommand: (name) ->
         unless name.match /\./
-            name = "termrk." + name
+            name = "termrk:" + name
         atom.commands.dispatch(
             @element,
             # document.querySelector('atom-workspace'),
@@ -196,10 +199,9 @@ class TermrkView extends View
         cols = Math.floor(width / fontWidth)
         rows = Math.floor(height / fontHeight)
 
-        console.log 'panel: ', width, height
-        console.log 'terminal: ', cols, rows
-        # console.log font
-        # console.log fontWidth, fontHeight
+        if window.debug?
+            console.log 'panel: ', width, height
+            console.log 'terminal: ', cols, rows
 
         @terminal.resize(cols, rows)
         @process.resize(cols, rows)
@@ -209,7 +211,6 @@ class TermrkView extends View
         return $(@parent()[0])
 
     getPanelHeight: ->
-        console.log Termrk
         return require('./termrk').getPanelHeight()
 
     # Public: returns the PID of the running process
