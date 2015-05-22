@@ -3,10 +3,11 @@
 # author: romgrk
 # description: atom utils
 
-_ = require 'underscore-plus'
+_  = require 'underscore-plus'
+Fs = require 'fs-plus'
+OS = require 'os'
 
 {$, $$, View} = require 'space-pen'
-
 
 class Config
     prefix: null
@@ -115,4 +116,14 @@ Keymap =
     normalizeKeystrokes: (s) ->
         window.require('atom-keymap/lib/helpers').normalizeKeystrokes(s)
 
-module.exports = {Font, Config, Keymap}
+Paths =
+    home: ->
+        Fs.getHomeDirectory()
+
+    tmp: ->
+        OS.tmpdir()
+
+    project: ->
+        atom.project.getPaths()[0]
+
+module.exports = {Font, Config, Keymap, Paths}

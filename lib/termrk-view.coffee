@@ -1,7 +1,7 @@
 
 Q   = require 'q'
 $   = require 'jquery.transit'
-pty = require('pty.js')
+pty = require 'pty.js'
 
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
@@ -16,6 +16,7 @@ Utils  = require './utils'
 Config = new Utils.Config('termrk')
 Font   = Utils.Font
 Keymap = Utils.Keymap
+Paths  = Utils.Paths
 
 module.exports =
 class TermrkView extends View
@@ -46,6 +47,11 @@ class TermrkView extends View
         else
             'sh'
 
+    @getStartingDir: ->
+        switch Config.get('startingDir')
+            when 'home' then Paths.home()
+            when 'project' then Paths.project()
+            else process.cwd()
     ###
     Section: instance
     ###
@@ -85,36 +91,28 @@ class TermrkView extends View
         @updateFont()
 
     # Private: starts pty.js child process
-    spawnProcess: ->
+    spawnProcess: (options={}) ->
         shell = Config.get 'shellCommand'
         if shell is 'auto-detect'
             shell = @constructor.getShell()
 
-        # shell = process.env.SHELL || process.env.TERM || 'sh'
-        options =
-                name: 'xterm-256color'
-                cols: 80
-                rows: 24
-                cwd: process.cwd()
+        options.name = options.name ? 'xterm-256color'
+        options.cwd  = options.cwd ? @constructor.getStartingDir()
+        options.cols = 80
+        options.rows = 24
 
         try
             @process = pty.fork(shell, [], options)
-            console.log "Termrk: started process #{shell}"
-            console.log "pid:#{@process.pid} and fd:#{@process.fd}"
         catch error
-            console.error("Termrk: couldn't start process "
-                + "#{shell} with pid:#{@process.pid}")
-            console.error error
+            error.message += "\nshell: #{shell}"
             throw error
 
         @process.on 'data', (data) =>
             @terminal.write data
 
         @process.on 'exit', (code, signal) =>
-            console.log "Termrk process: exit(%i) and signal %s",
-                code, signal
             delete @process
-            @terminal.write('Process terminated. Restarting.')
+            @terminal.write('Process terminated. Restarting.\n')
             @spawnProcess()
 
         @pidLabel.text @process.pid

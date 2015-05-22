@@ -33,7 +33,8 @@ module.exports = Termrk =
         # Shell options
         'shellCommand':
             title:       'Command'
-            description: 'Command to call to start the shell. (auto-detect or executable file)'
+            description: 'Command to call to start the shell. ' +
+                         '(auto-detect or executable file)'
             type:        'string'
             default:     'auto-detect'
         'startingDir':
@@ -83,19 +84,22 @@ module.exports = Termrk =
         @containerView.on 'resize', ->
             console.log 'container resize' if window.debug?
 
-        @workspaceCommands =
+        @commands =
             'termrk:toggle':            => @toggle()
             'termrk:hide':              => @hide()
             'termrk:show':              => @show()
-            'termrk:create-terminal':   => @setActiveTerminal(@createTerminal())
-            'termrk:activate-next-terminal':   => @setActiveTerminal(@getNextTerminal())
-            'termrk:activate-previous-terminal':   => @setActiveTerminal(@getPreviousTerminal())
+            'termrk:create-terminal':   =>
+                @setActiveTerminal(@createTerminal())
+            'termrk:activate-next-terminal':   =>
+                @setActiveTerminal(@getNextTerminal())
+            'termrk:activate-previous-terminal':   =>
+                @setActiveTerminal(@getPreviousTerminal())
 
         @configKeys =
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
 
-        @subscriptions.add atom.commands.add 'atom-workspace', @workspaceCommands
+        @subscriptions.add atom.commands.add 'atom-workspace', @commands
         @subscriptions.add Config.observe @configKeys
 
         @setActiveTerminal(@createTerminal())
