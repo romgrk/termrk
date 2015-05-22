@@ -10,7 +10,9 @@ pty = require('pty.js')
 
 window.termjs = require 'term.js' if window.debug?
 
-{Font, Config} = require './utils'
+Utils  = require './utils'
+Config = new Utils.Config('termrk')
+Font   = Utils.Font
 
 # Will be assigned to main module
 Termrk = null

@@ -1,12 +1,21 @@
+#
+# file: utils.coffee
+# author: romgrk
+# description: atom utils
 
 {$, $$, View} = require 'space-pen'
 
-Config =
+KeymapHelpers = window.require 'atom-keymap/lib/helpers'
+
+class Config
+    prefix: null
+    constructor: (@prefix) ->
+
     get: (k) ->
-        return atom.config.get "termrk." + k
+        return atom.config.get (@prefix + '.' + k)
 
     set: (k, v) ->
-        return atom.config.set "termrk." + k, v
+        return atom.config.set (@prefix + '.' + k), v
 
 Font =
     # Public: get the width of the text with specified font
@@ -43,4 +52,21 @@ Font =
 
         return h
 
-module.exports = {Font, Config}
+Keymap =
+
+    helpers: KeymapHelpers
+
+    add: (keystrokes, command) ->
+        newKeybinding = {
+            'atom-workspace': {}
+        }
+        newKeybinding['atom-workspace'][keystrokes] = command
+        atom.keymap.add(__filename, newKeybinding)
+
+    find: (options) ->
+        return unless options?
+
+
+module.exports = {Font, Config, Keymap}
+
+console.log Keymap.add 'ctrl-@', 'nop-long'

@@ -5,7 +5,9 @@
 $                     = require 'jquery.transit'
 
 TermrkView = require './termrk-view'
-{Font, Config} = require './utils'
+Utils      = require './utils'
+Config     = new Utils.Config('termrk')
+Font       = Utils.Font
 
 
 module.exports = Termrk =
