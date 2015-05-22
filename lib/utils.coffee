@@ -3,9 +3,10 @@
 # author: romgrk
 # description: atom utils
 
+_ = require 'underscore-plus'
+
 {$, $$, View} = require 'space-pen'
 
-KeymapHelpers = window.require 'atom-keymap/lib/helpers'
 
 class Config
     prefix: null
@@ -54,8 +55,6 @@ Font =
 
 Keymap =
 
-    helpers: KeymapHelpers
-
     add: (keystrokes, command) ->
         newKeybinding = {
             'atom-workspace': {}
@@ -64,9 +63,49 @@ Keymap =
         atom.keymap.add(__filename, newKeybinding)
 
     find: (options) ->
-        return unless options?
+        {keys, pack, target, selector, source} = options
 
+        command    = options.command ? options.cmd ? null
+        keystrokes = options.keystrokes ? null
+
+        bindings = atom.keymap.getKeyBindings()
+
+        if pack?
+            bindings = bindings.filter (b) -> (b.command.match pack+':.*')?
+        else if command?
+            bindings = bindings.filter (b) -> b.command is command
+
+        if keys?
+            bindings = bindings.filter (b) ->
+                b.keystrokes.indexOf(keys) == 0
+        else if keystrokes?
+            keystrokes = @normalizeKeystrokes(keystrokes)
+            bindings = bindings.filter (b) ->
+                b.keystrokes is keystrokes
+
+        if target?
+            candidateBindings = bindings
+            bindings = []
+            element = target
+            while element? and element isnt document
+                matchingBindings = candidateBindings
+                .filter (binding) -> element.webkitMatchesSelector(binding.selector)
+                .sort (a, b) -> a.compare(b)
+                bindings.push(matchingBindings...)
+                element = element.parentElement
+
+        if selector?
+            if _.isRegExp selector
+                bindings = bindings.filter (b) -> (b.selector.match(selector))?
+            else
+                bindings = bindings.filter (b) -> b.selector is selector
+
+        if source?
+            bindings = bindings.filter (b) -> b.source is source
+
+        return bindings
+
+    normalizeKeystrokes: (s) ->
+        window.require('atom-keymap/lib/helpers').normalizeKeystrokes(s)
 
 module.exports = {Font, Config, Keymap}
-
-console.log Keymap.add 'ctrl-@', 'nop-long'
