@@ -2,7 +2,6 @@
 # in workspace
 'atom-workspace':
     'alt-space':      'termrk:toggle'
-    'ctrl-alt-space': 'termrk:create-terminal'
 
 # in termrk view
 '.termrk .terminal':
