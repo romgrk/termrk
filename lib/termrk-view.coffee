@@ -52,6 +52,7 @@ class TermrkView extends View
             when 'home' then Paths.home()
             when 'project' then Paths.project()
             else process.cwd()
+                
     ###
     Section: instance
     ###
