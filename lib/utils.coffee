@@ -10,13 +10,20 @@ _ = require 'underscore-plus'
 
 class Config
     prefix: null
-    constructor: (@prefix) ->
+    constructor: (prefix) ->
+        @prefix = prefix + '.'
 
     get: (k) ->
-        return atom.config.get (@prefix + '.' + k)
+        return atom.config.get (@prefix + k)
 
     set: (k, v) ->
-        return atom.config.set (@prefix + '.' + k), v
+        return atom.config.set (@prefix + k), v
+
+    observe: (key, callback) ->
+        if typeof key is 'object'
+            atom.config.onDidChange(@prefix+k, fn) for k, fn of key
+        else
+            atom.config.onDidChange(@prefix+key, callback)
 
 Font =
     # Public: get the width of the text with specified font

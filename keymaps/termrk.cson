@@ -2,6 +2,7 @@
 # in workspace
 'atom-workspace':
     'alt-space':      'termrk:toggle'
+    'ctrl-alt-space': 'termrk:create-terminal-current-dir'
 
 # in termrk view
 '.termrk':

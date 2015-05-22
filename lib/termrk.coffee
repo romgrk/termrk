@@ -30,18 +30,35 @@ module.exports = Termrk =
 
     # Private: config description
     config:
+        # Shell options
+        'shellCommand':
+            title:       'Command'
+            description: 'Command to call to start the shell. (auto-detect or executable file)'
+            type:        'string'
+            default:     'auto-detect'
+        'startingDir':
+            title:       'Start dir'
+            description: 'Dir where the shell should be started'
+            type:        'string'
+            default:     'project'
+            enum:        ['home', 'project', 'cwd']
+
+        # Rendering options
         'defaultHeight':
+            title:       'Panel height'
             description: 'Default height of the terminal-panel (in px)'
             type:        'integer'
             default:     300
-        'shellCommand':
-            description: 'Command to call to start the shell. (auto-detect by default)'
+        'fontSize':
+            title:       'Font size'
+            description: 'CSS style, defaults to px if no unit is specified'
             type:        'string'
-            default:     'auto-detect'
-        'unfocusKeystroke':
-            description: 'KeyStroke that hides the terminal when it is focused. (atom keymap format)'
+            default:     '14px'
+        'fontFamily':
+            title:       'Font family'
             type:        'string'
-            default:     'escape'
+            default:     'Monospace'
+
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
@@ -74,7 +91,12 @@ module.exports = Termrk =
             'termrk:activate-next-terminal':   => @setActiveTerminal(@getNextTerminal())
             'termrk:activate-previous-terminal':   => @setActiveTerminal(@getPreviousTerminal())
 
+        @configKeys =
+            'fontSize':   -> TermrkView.fontChanged()
+            'fontFamily': -> TermrkView.fontChanged()
+
         @subscriptions.add atom.commands.add 'atom-workspace', @workspaceCommands
+        @subscriptions.add Config.observe @configKeys
 
         @setActiveTerminal(@createTerminal())
 

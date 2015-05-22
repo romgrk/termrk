@@ -6,17 +6,16 @@ pty = require('pty.js')
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
-Terminal              = require './termjs-fix'
 
 window.termjs = require 'term.js' if window.debug?
+
+Termrk   = require './termrk'
+Terminal = require './termjs-fix'
 
 Utils  = require './utils'
 Config = new Utils.Config('termrk')
 Font   = Utils.Font
 Keymap = Utils.Keymap
-
-# Will be assigned to main module
-Termrk = null
 
 module.exports =
 class TermrkView extends View
@@ -25,6 +24,19 @@ class TermrkView extends View
     Section: static
     ###
 
+    @instances: new Set()
+
+    @addInstance: (termrkView) ->
+        @instances.add(termrkView)
+
+    @removeInstance: (termrkView) ->
+        @instances.remove(termrkView)
+
+    @fontChanged: =>
+        @instances.forEach (instance) ->
+            instance.updateFont.call(instance)
+
+    # Public: get default system shell
     @getShell: ->
         if process.env.SHELL?
             process.env.SHELL
@@ -59,7 +71,7 @@ class TermrkView extends View
     ###
 
     initialize: (serializedState) ->
-        Termrk = atom.packages.getLoadedPackage('termrk')
+        TermrkView.addInstance this
 
         @time  = String(Date.now())
         @input = @element.querySelector 'input'
@@ -69,6 +81,8 @@ class TermrkView extends View
         @spawnProcess()
 
         @attachListeners()
+
+        @updateFont()
 
     # Private: starts pty.js child process
     spawnProcess: ->
@@ -206,6 +220,13 @@ class TermrkView extends View
 
         @terminal.resize(cols, rows)
         @process.resize(cols, rows)
+
+    # Public: set font from config
+    updateFont: =>
+        @terminalView.css
+            'font-size':   Config.get('fontSize')
+            'font-family': Config.get('fontFamily')
+        @updateTerminalSize()
 
     # Public: get the actual untoggled height
     getPanelHeight: ->
