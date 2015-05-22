@@ -4,7 +4,13 @@
     'alt-space':      'termrk:toggle'
 
 # in termrk view
-'.termrk .terminal':
+'.termrk':
+    'enter':          'native!'
+    'backspace':      'native!'
+    'tab':            'native!'
+    'delete':         'native!'
+    'insert':         'native!'
+
     'escape':         'termrk:hide'
     'ctrl-space':     'termrk:create-terminal'
     'ctrl-tab':       'termrk:activate-next-terminal'

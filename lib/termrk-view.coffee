@@ -6,13 +6,14 @@ pty = require('pty.js')
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
-{Terminal}            = require 'term.js'
+Terminal              = require './termjs-fix'
 
 window.termjs = require 'term.js' if window.debug?
 
 Utils  = require './utils'
 Config = new Utils.Config('termrk')
 Font   = Utils.Font
+Keymap = Utils.Keymap
 
 # Will be assigned to main module
 Termrk = null
@@ -20,48 +21,62 @@ Termrk = null
 module.exports =
 class TermrkView extends View
 
-    # Public: {Child_process} process of the running shell
-    process: null
+    ###
+    Section: static
+    ###
 
+    @getShell: ->
+        if process.env.SHELL?
+            process.env.SHELL
+        else if /win/.test process.platform
+            # TODO cygwin?
+            process.env.TERM ? process.env.COMSPEC
+        else
+            'sh'
+
+    ###
+    Section: instance
+    ###
+
+    # Public: creation time. Used as index {String}
     time: null
 
+    # Public: {pty.js:Terminal} process of the running shell
+    process: null
+
+    # Public: {term.js:Terminal} and jQ wrapper of the element
     terminal:     null
     terminalView: null
 
     @content: ->
         @div class: 'termrk', =>
             @span class: 'pid-label', outlet: 'pidLabel'
+            @input class: 'input-keylistener'
             # @div class: 'terminal' # <= created by term.js
 
+    ###
+    Section: init/setup
+    ###
 
     initialize: (serializedState) ->
         Termrk = atom.packages.getLoadedPackage('termrk')
 
+        @time  = String(Date.now())
+        @input = @element.querySelector 'input'
+
         @setupTerminalElement()
 
         @spawnProcess()
-        unless @process?
-            console.error "Termrk: aborting initialization"
-            return
 
-        @time = "" + Date.now()
+        @attachListeners()
 
-        @pidLabel.text @process.pid
-
-    # Public: called after this terminal view has been activated
-    activated: ->
-        @updateTerminalSize()
-        @terminalView.focus()
-        @pidLabel.addClass 'fade-out'
-
-    # Public: called after this terminal view has been deactivated
-    deactivated: ->
-        @pidLabel.removeClass 'fade-out'
-        @terminalView.blur()
-
-    # Public: spawns the shell process
+    # Private: starts pty.js child process
     spawnProcess: ->
-        shell = process.env.SHELL || process.env.TERM || 'sh'
+        shell = Config.get 'shellCommand'
+        if shell is 'auto-detect'
+            shell = @constructor.getShell()
+
+        # shell = process.env.SHELL || process.env.TERM || 'sh'
         options =
                 name: 'xterm-256color'
                 cols: 80
@@ -76,7 +91,7 @@ class TermrkView extends View
             console.error("Termrk: couldn't start process "
                 + "#{shell} with pid:#{@process.pid}")
             console.error error
-            return
+            throw error
 
         @process.on 'data', (data) =>
             @terminal.write data
@@ -88,10 +103,76 @@ class TermrkView extends View
             @terminal.write('Process terminated. Restarting.')
             @spawnProcess()
 
-        @terminal.on 'data', (data) =>
-            @process.write(data)
+        @pidLabel.text @process.pid
 
         return
+
+    # Private: initialize the {Terminal} (term.js)
+    setupTerminalElement: ->
+        @terminal = new Terminal
+            cols: 80
+            rows: 24
+            useStyle: true
+            screenKeys: true
+
+        @terminal.open @element
+        @terminalView = @find('.terminal')
+        @terminal.on 'data', (data) => @process.write(data)
+
+    # Private: attach listeners
+    attachListeners: ->
+        @input.addEventListener 'keydown', @keydownListener.bind(@), true
+        # document.querySelector('atom-workspace').addEventListener 'keydown',
+        #     @keydownListener.bind(@)
+        @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
+
+        @input.addEventListener 'focus', =>
+            @terminal.focus()
+            console.log 'focus'
+            return true
+        @input.addEventListener 'blur', =>
+            @terminal.blur()
+            console.log 'blur'
+            return true
+
+        @terminal.element.addEventListener 'focus', =>
+            @input.focus()
+
+    ###
+    Section: event listeners
+    ###
+
+    # Private: callback
+    keydownListener: (event) =>
+        return unless event.target is @input
+        keystroke = atom.keymaps.keystrokeForKeyboardEvent(event)
+        bindings  = Keymap.find target: @terminal.element, keystrokes: keystroke
+
+        atom.keymaps.handleKeyboardEvent(event)
+        if event.defaultPrevented
+            console.log keystroke, 'prevented', event
+            event.stopImmediatePropagation()
+            return false
+        else
+            allow = @terminal.keyDown.call(@terminal, event)
+            console.log keystroke, event.target.tagName + '.' + event.target.className,
+                allow, event
+            return allow
+
+    # Public: called after this terminal view has been activated
+    activated: ->
+        @updateTerminalSize()
+        @focus()
+        @pidLabel.addClass 'fade-out'
+
+    # Public: called after this terminal view has been deactivated
+    deactivated: ->
+        @pidLabel.removeClass 'fade-out'
+        @blur()
+
+    ###
+    Section: display/render
+    ###
 
     # Public: animate height to 0px.
     animatedShow: (cb) ->
@@ -107,85 +188,40 @@ class TermrkView extends View
                 console.log 'hidden ' + @process.pid
             cb?()
 
-    # Private: initialize the {Terminal} (term.js)
-    setupTerminalElement: ->
+    # Public: update the terminal cols/rows based on the panel size
+    updateTerminalSize: ->
+        parent = @getParent()
+        width  = parent.width()
+        height = @getPanelHeight()
 
-        # Clear term.js style injection.
-        if Terminal.insertStyle?
-            Terminal.insertStyle = () -> return
+        font       = @terminalView.css('font')
+        fontWidth  = Font.getWidth("a", font)
+        fontHeight = Font.getHeight("a", font)
 
-        @terminal = new Terminal
-            cols: 80
-            rows: 24
-            useStyle: true
-            screenKeys: true
-
-        @terminal.open @element
-        @terminalView = @find('.terminal')
-
-        @observeTerminalKeydown()
-
-    # Private: spy on terminal's keyEvent function to be abble to
-    # get keystrokes
-    observeTerminalKeydown: ->
-        # @originalTerminalKeydown = @terminal.keyDown.bind(@terminal)
-        @terminal.originalKeyDown  = @terminal.keyDown
-        @terminal.originalKeyPress = @terminal.keyPress
-
-        @terminal.keyDown  = @onTerminalKeyEvent.bind(@)
-        @terminal.keyPress = @onTerminalKeyEvent.bind(@)
-
-    # Private: called whenever a key is pressed on the terminal, before
-    # the terminal receives it
-    onTerminalKeyEvent: (event) =>
-        Termrk = require('./termrk')
-
-        keystroke = KeyKit.fromKBEvent(event).toString()
-        unfocusKeystroke = Config.get('unfocusKeystroke')
-
-        msg = 'termrk:key '
-        msg +=  keystroke + '\t' + event.type
-
-        isKeybinding = false
-
-        switch keystroke
-            when unfocusKeystroke # escape by default
-                # @dispatchCommand('hide')
-                msg += '(hide)'
-                isKeybinding = true
-                return
-            when 'ctrl-space'
-                # @dispatchCommand('create-terminal')
-                msg += '(create)'
-                isKeybinding = true
-                return
-            when 'ctrl-escape'
-                msg += '(esc)'
-                event.ctrlKey = false
-            when 'ctrl-tab'
-                # @dispatchCommand('activate-next-terminal')
-                msg += '(next)'
-                isKeybinding = true
-                return
-            when 'ctrl-shift-tab'
-                # @dispatchCommand('activate-previous-terminal')
-                msg += '(previous)'
-                isKeybinding = true
-                return
-
-        cancelled = not if isKeybinding
-            true
-        else if event.type is 'keypress'
-            @terminal.originalKeyPress(event)
-        else if event.type is 'keydown'
-            @terminal.originalKeyDown(event)
-
-        @terminal.element.focus()
+        cols = Math.floor(width / fontWidth)
+        rows = Math.floor(height / fontHeight)
 
         if window.debug?
-            console.log msg, 'cc?', cancelled
+            console.log 'resize terminal: ', cols, rows
 
-        return (not cancelled)
+        @terminal.resize(cols, rows)
+        @process.resize(cols, rows)
+
+    # Public: get the actual untoggled height
+    getPanelHeight: ->
+        return require('./termrk').getPanelHeight()
+
+    # Public:
+    focus: ->
+        @input.focus()
+
+    # Public:
+    blur: ->
+        @input.blur()
+
+    ###
+    Section: helpers/utils
+    ###
 
     # Public: dispatches the command `name` on element
     #
@@ -202,38 +238,6 @@ class TermrkView extends View
             name)
         console.log 'termrk:dispatched ' + name
 
-    # Public: update the terminal cols/rows based on the panel size
-    updateTerminalSize: ->
-        parent = @getParent()
-        width  = parent.width()
-        height = @getPanelHeight()
-
-        font       = @terminalView.css('font')
-        fontWidth  = Font.getWidth("a", font)
-        fontHeight = Font.getHeight("a", font)
-
-        cols = Math.floor(width / fontWidth)
-        rows = Math.floor(height / fontHeight)
-
-        if window.debug?
-            console.log atom.keymap.findKeyBindings(target:@terminal.element)
-            console.log 'panel: ', width, height
-            console.log 'terminal: ', cols, rows
-
-        @terminal.resize(cols, rows)
-        @process.resize(cols, rows)
-
-    # Public: returns the parent panel {PanelView}
-    getParent: ->
-        return $(@parent()[0])
-
-    getPanelHeight: ->
-        return require('./termrk').getPanelHeight()
-
-    # Public: returns the PID of the running process
-    getPID: ->
-        @process.pid
-
     # Public: returns an object that can be retrieved when package is activated
     serialize: ->
 
@@ -247,3 +251,9 @@ class TermrkView extends View
 
     getElement: ->
         @element
+
+    getParent: ->
+        return $(@parent()[0])
+
+    getPID: ->
+        @process.pid

@@ -37,7 +37,7 @@ module.exports = Termrk =
         'shellCommand':
             description: 'Command to call to start the shell. (auto-detect by default)'
             type:        'string'
-            default:     'auto'
+            default:     'auto-detect'
         'unfocusKeystroke':
             description: 'KeyStroke that hides the terminal when it is focused. (atom keymap format)'
             type:        'string'
@@ -204,4 +204,4 @@ module.exports = Termrk =
         @subscriptions.dispose()
 
     serialize: ->
-        termrkViewState: @termrkView.serialize()
+        # termrkViewState: @termrkView.serialize()

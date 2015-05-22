@@ -2,9 +2,21 @@
 
 {Terminal} = require('term.js')
 
-# Clear term.js style injection.
-if Terminal.insertStyle?
-    Terminal.insertStyle = () -> return
+mouseListener = (ev) ->
+    unless Terminal.focus
+        return
 
+    el = ev.target || ev.srcElement
+    return unless el?
+
+    while el
+        if (el is Terminal.focus.element)
+            return
+        el = el.parentNode
+
+    Terminal.focus.blur();
+
+Terminal.insertStyle = -> return
+Terminal.bindKeys    = -> document.addEventListener 'mousedown', mouseListener
 
 module.exports = Terminal
