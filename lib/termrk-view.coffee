@@ -9,8 +9,9 @@ pty = require 'pty.js'
 
 window.termjs = require 'term.js' if window.debug?
 
-Termrk   = require './termrk'
-Terminal = require './termjs-fix'
+Termrk      = require './termrk'
+TermrkModel = require './termrk-model'
+Terminal    = require './termjs-fix'
 
 Utils  = require './utils'
 Config = new Utils.Config('termrk')
@@ -58,6 +59,7 @@ class TermrkView extends View
     ###
 
     subscriptions: null
+    model: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -169,8 +171,8 @@ class TermrkView extends View
     # Private: callback
     keydownListener: (event) =>
         return unless event.target is @input
-        keystroke = atom.keymaps.keystrokeForKeyboardEvent(event)
-        bindings  = Keymap.find target: @terminal.element, keystrokes: keystroke
+        # keystroke = atom.keymaps.keystrokeForKeyboardEvent(event)
+        # bindings  = Keymap.find target: @terminal.element, keystrokes: keystroke
 
         atom.keymaps.handleKeyboardEvent(event)
         if event.defaultPrevented
