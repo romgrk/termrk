@@ -4,12 +4,13 @@
 {$$, View}            = require 'space-pen'
 $                     = require 'jquery.transit'
 
-TermrkView = require './termrk-view'
-Utils      = require './utils'
-Config     = new Utils.Config('termrk')
-Font       = Utils.Font
-Keymap     = Utils.Keymap
-Paths      = Utils.Paths
+TermrkView  = require './termrk-view'
+TermrkModel = require './termrk-model'
+Config      = require './config'
+Utils       = require './utils'
+Font        = Utils.Font
+Keymap      = Utils.Keymap
+Paths       = Utils.Paths
 
 
 module.exports = Termrk =
@@ -31,7 +32,7 @@ module.exports = Termrk =
     activeTerminal: null
 
     # Private: config description
-    config: require './config'
+    config: Config.schema
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
@@ -98,7 +99,8 @@ module.exports = Termrk =
         return container
 
     createTerminal: (options={}) ->
-        termrkView = new TermrkView(options)
+        model = new TermrkModel(options)
+        termrkView = new TermrkView(model)
         termrkView.height(0)
 
         @terminals[termrkView.time] = termrkView

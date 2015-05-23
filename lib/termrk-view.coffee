@@ -3,6 +3,7 @@ Q   = require 'q'
 $   = require 'jquery.transit'
 pty = require 'pty.js'
 
+{Emitter}             = require 'atom'
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
@@ -13,8 +14,8 @@ Termrk      = require './termrk'
 TermrkModel = require './termrk-model'
 Terminal    = require './termjs-fix'
 
+Config = require './config'
 Utils  = require './utils'
-Config = new Utils.Config('termrk')
 Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
@@ -38,28 +39,13 @@ class TermrkView extends View
         @instances.forEach (instance) ->
             instance.updateFont.call(instance)
 
-    # Public: get default system shell
-    @getShell: ->
-        if process.env.SHELL?
-            process.env.SHELL
-        else if /win/.test process.platform
-            # TODO cygwin?
-            process.env.TERM ? process.env.COMSPEC
-        else
-            'sh'
-
-    @getStartingDir: ->
-        switch Config.get('startingDir')
-            when 'home' then Paths.home()
-            when 'project' then Paths.project()
-            else process.cwd()
-
     ###
     Section: instance
     ###
 
+    model:         null
+    emitter:       null
     subscriptions: null
-    model: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -78,18 +64,26 @@ class TermrkView extends View
             # @div class: 'terminal' # <= created by term.js
 
     ###
+    Section: Events
+    ###
+
+    onDidResize: (callback) ->
+        @emitter.on 'resize', callback
+
+    ###
     Section: init/setup
     ###
 
-    initialize: (options) ->
+    initialize: (@model) ->
         TermrkView.addInstance this
         @time  = String(Date.now())
 
+        @emitter = new Emitter
         @subscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
         @setupTerminalElement()
-        @spawnProcess(options)
+
         @attachListeners()
 
         @registerCommands '.termrk',
@@ -97,47 +91,16 @@ class TermrkView extends View
 
         @updateFont()
 
-    # Private: starts pty.js child process
-    spawnProcess: (options={}) ->
-        shell = Config.get 'shellCommand'
-        if shell is 'auto-detect'
-            shell = @constructor.getShell()
-
-        options.name = options.name ? 'xterm-256color'
-        options.cwd  = options.cwd ? @constructor.getStartingDir()
-        options.cols = 80
-        options.rows = 24
-
-        try
-            @process = pty.fork(shell, [], options)
-        catch error
-            error.message += "\nshell: #{shell}"
-            throw error
-
-        @process.on 'data', (data) =>
-            @terminal.write data
-
-        @process.on 'exit', (code, signal) =>
-            delete @process
-            # @terminal.write('Process terminated. Restarting.\n')
-            @terminal.write('\x1b[31mProcess terminated. Restarting.\x1b[m\r\n')
-            @spawnProcess()
-
-        @pidLabel.text @process.pid
-
-        return
-
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
         @terminal = new Terminal
             cols: 80
             rows: 24
-            useStyle: true
             screenKeys: true
-
         @terminal.open @element
+        @terminal.on 'data', (data) => @model.write(data)
+
         @terminalView = @find('.terminal')
-        @terminal.on 'data', (data) => @process.write(data)
 
     # Private: attach listeners
     attachListeners: ->
@@ -154,14 +117,12 @@ class TermrkView extends View
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
 
-    ###
-    Section: commands
-    ###
-
-    # Public: writes text from clipboard to terminal
-    paste: ->
-        @process.write atom.clipboard.read()
-        @focus()
+        @model.onDidStartProcess (shellName) =>
+            @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
+        @model.onDidExitProcess (code, signal) =>
+            @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
+        @model.onDidReceiveData (data) =>
+            @terminal.write data
 
     ###
     Section: event listeners
@@ -169,9 +130,8 @@ class TermrkView extends View
 
     # Private: callback
     keydownListener: (event) =>
-        return unless event.target is @input
-
         atom.keymaps.handleKeyboardEvent(event)
+
         if event.defaultPrevented
             event.stopImmediatePropagation()
             return false
@@ -222,7 +182,8 @@ class TermrkView extends View
         rows = Math.floor(height / fontHeight)
 
         @terminal.resize(cols, rows)
-        @process.resize(cols, rows)
+        @model.resize(cols, rows)
+        @emitter.emit 'resize', {cols, rows}
 
     # Public: set font from config
     updateFont: =>
@@ -256,17 +217,12 @@ class TermrkView extends View
 
     # Tear down any state and detach
     destroy: ->
-        @process.kill()
+        @model.destroy()
         @element.remove()
-
-    getProcess: ->
-        @process
+        @subscriptions.dispose()
 
     getElement: ->
         @element
 
     getParent: ->
-        return $(@parent()[0])
-
-    getPID: ->
-        @process.pid
+        $(@parent()[0])
