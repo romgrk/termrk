@@ -16,6 +16,7 @@
     'up':        'native!'
     'down':      'native!'
     'ctrl-c':    'native!'
+    'ctrl-y':    'native!'
 
     'escape':         'termrk:hide'
     'ctrl-escape':    'termrk:close-terminal'

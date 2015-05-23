@@ -39,5 +39,7 @@ class TermrkModel
     Section: instance
     ###
 
+    process: null
+
     constructor: (options) ->
         TermrkModel.addInstance this

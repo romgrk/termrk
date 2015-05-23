@@ -119,7 +119,8 @@ class TermrkView extends View
 
         @process.on 'exit', (code, signal) =>
             delete @process
-            @terminal.write('Process terminated. Restarting.\n')
+            # @terminal.write('Process terminated. Restarting.\n')
+            @terminal.write('\x1b[31mProcess terminated. Restarting.\x1b[m\r\n')
             @spawnProcess()
 
         @pidLabel.text @process.pid
@@ -141,8 +142,6 @@ class TermrkView extends View
     # Private: attach listeners
     attachListeners: ->
         @input.addEventListener 'keydown', @keydownListener.bind(@), true
-        # document.querySelector('atom-workspace').addEventListener 'keydown',
-        #     @keydownListener.bind(@)
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
 
         @input.addEventListener 'focus', =>
@@ -171,18 +170,13 @@ class TermrkView extends View
     # Private: callback
     keydownListener: (event) =>
         return unless event.target is @input
-        # keystroke = atom.keymaps.keystrokeForKeyboardEvent(event)
-        # bindings  = Keymap.find target: @terminal.element, keystrokes: keystroke
 
         atom.keymaps.handleKeyboardEvent(event)
         if event.defaultPrevented
-            # console.log keystroke, 'prevented', event
             event.stopImmediatePropagation()
             return false
         else
             allow = @terminal.keyDown.call(@terminal, event)
-            # console.log keystroke, event.target.tagName + '.' + event.target.className,
-                # allow, event
             return allow
 
     # Public: called after this terminal view has been activated
