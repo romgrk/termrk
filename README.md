@@ -25,15 +25,15 @@ apm rebuild
 
 ## Keybindings
 
-~~Because of the way term.js handles keystrokes, some keybindings aren't listed in the usual way.~~
-Keybindings work fine with the latest published patch, waiting for feedback.
-
 #### workspace
+
 - `alt-space` : toggle terminal panel
+- `ctrl-alt-space` : create terminal in current file's dir
 
-#### inside terminal (might be broken)
+#### inside terminal
 
-- `escape` : hide terminal panel
+- `escape` : hide panel
+- `ctrl-escape` : close current terminal
 - `ctrl-space` : create terminal
 - `ctrl-tab` : activate next terminal
 - `ctrl-shift-tab` : activate previous terminal
@@ -42,9 +42,6 @@ Keybindings work fine with the latest published patch, waiting for feedback.
 ### Features
 - Toggle panel
 - Toggle between terminals
-
-### Known bugs
-- Keybindings don't work well while the terminal is focused.
 
 ___
 
