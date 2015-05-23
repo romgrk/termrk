@@ -52,10 +52,12 @@ class TermrkView extends View
             when 'home' then Paths.home()
             when 'project' then Paths.project()
             else process.cwd()
-                
+
     ###
     Section: instance
     ###
+
+    subscriptions: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -77,17 +79,19 @@ class TermrkView extends View
     Section: init/setup
     ###
 
-    initialize: (serializedState) ->
+    initialize: (options) ->
         TermrkView.addInstance this
-
         @time  = String(Date.now())
+
+        @subscriptions = new CompositeDisposable
+
         @input = @element.querySelector 'input'
-
         @setupTerminalElement()
-
-        @spawnProcess()
-
+        @spawnProcess(options)
         @attachListeners()
+
+        @registerCommands '.termrk',
+            'core:paste': => @paste()
 
         @updateFont()
 
@@ -141,15 +145,22 @@ class TermrkView extends View
 
         @input.addEventListener 'focus', =>
             @terminal.focus()
-            console.log 'focus'
             return true
         @input.addEventListener 'blur', =>
             @terminal.blur()
-            console.log 'blur'
             return true
 
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
+
+    ###
+    Section: commands
+    ###
+
+    # Public: writes text from clipboard to terminal
+    paste: ->
+        @process.write atom.clipboard.read()
+        @focus()
 
     ###
     Section: event listeners
@@ -163,13 +174,13 @@ class TermrkView extends View
 
         atom.keymaps.handleKeyboardEvent(event)
         if event.defaultPrevented
-            console.log keystroke, 'prevented', event
+            # console.log keystroke, 'prevented', event
             event.stopImmediatePropagation()
             return false
         else
             allow = @terminal.keyDown.call(@terminal, event)
-            console.log keystroke, event.target.tagName + '.' + event.target.className,
-                allow, event
+            # console.log keystroke, event.target.tagName + '.' + event.target.className,
+                # allow, event
             return allow
 
     # Public: called after this terminal view has been activated
@@ -180,6 +191,7 @@ class TermrkView extends View
 
     # Public: called after this terminal view has been deactivated
     deactivated: ->
+        return unless document.activeElement is @input
         @pidLabel.removeClass 'fade-out'
         @blur()
 
@@ -189,16 +201,15 @@ class TermrkView extends View
 
     # Public: animate height to 0px.
     animatedShow: (cb) ->
-        @animate {height: @getPanelHeight()}, 250, =>
-            if window.debug?
-                console.log 'showed ' + @process.pid
+        @animate {height: @getPanelHeight()}, 250, ->
             cb?()
 
     # Public: animate height to fill the container.
     animatedHide: (cb) ->
+        return if @hidding
+        @hidding = true
         @animate {height: '0'}, 250, =>
-            if window.debug?
-                console.log 'hidden ' + @process.pid
+            @hidding = false
             cb?()
 
     # Public: update the terminal cols/rows based on the panel size
@@ -213,9 +224,6 @@ class TermrkView extends View
 
         cols = Math.floor(width / fontWidth)
         rows = Math.floor(height / fontHeight)
-
-        if window.debug?
-            console.log 'resize terminal: ', cols, rows
 
         @terminal.resize(cols, rows)
         @process.resize(cols, rows)
@@ -243,20 +251,9 @@ class TermrkView extends View
     Section: helpers/utils
     ###
 
-    # Public: dispatches the command `name` on element
-    #
-    # `name` - {String} command to dispatch
-    #           if `name` doesn't contains '.', 'termrk.' is prepended
-    #
-    # Returns nothing.
-    dispatchCommand: (name) ->
-        unless name.match /\./
-            name = "termrk:" + name
-        atom.commands.dispatch(
-            @element,
-            # document.querySelector('atom-workspace'),
-            name)
-        console.log 'termrk:dispatched ' + name
+    # Private: registers commands
+    registerCommands: (target, commands) ->
+        @subscriptions.add atom.commands.add target, commands
 
     # Public: returns an object that can be retrieved when package is activated
     serialize: ->

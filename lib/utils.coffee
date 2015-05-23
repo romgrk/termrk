@@ -3,9 +3,10 @@
 # author: romgrk
 # description: atom utils
 
-_  = require 'underscore-plus'
-Fs = require 'fs-plus'
-OS = require 'os'
+_    = require 'underscore-plus'
+Path = require 'path'
+Fs   = require 'fs-plus'
+OS   = require 'os'
 
 {$, $$, View} = require 'space-pen'
 
@@ -125,5 +126,8 @@ Paths =
 
     project: ->
         atom.project.getPaths()[0]
+
+    current: ->
+        Path.dirname atom.workspace.getActiveTextEditor().getURI()
 
 module.exports = {Font, Config, Keymap, Paths}

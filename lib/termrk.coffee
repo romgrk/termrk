@@ -8,6 +8,8 @@ TermrkView = require './termrk-view'
 Utils      = require './utils'
 Config     = new Utils.Config('termrk')
 Font       = Utils.Font
+Keymap     = Utils.Keymap
+Paths      = Utils.Paths
 
 
 module.exports = Termrk =
@@ -34,6 +36,38 @@ module.exports = Termrk =
     activate: (state) ->
         @subscriptions = new CompositeDisposable
 
+        @setupElements()
+
+        @registerCommands 'atom-workspace',
+            'termrk:toggle':            => @toggle()
+            'termrk:hide':              => @hide()
+            'termrk:show':              => @show()
+            'termrk:create-terminal':   =>
+                @setActiveTerminal(@createTerminal())
+            'termrk:create-terminal-current-dir': =>
+                @setActiveTerminal @createTerminal
+                    cwd: Paths.current()
+
+        @registerCommands '.termrk',
+            'termrk:close-terminal':   =>
+                @removeTerminal(@getActiveTerminal())
+            'termrk:activate-next-terminal':   =>
+                @setActiveTerminal(@getNextTerminal())
+            'termrk:activate-previous-terminal':   =>
+                @setActiveTerminal(@getPreviousTerminal())
+
+        @subscriptions.add Config.observe
+            'fontSize':   -> TermrkView.fontChanged()
+            'fontFamily': -> TermrkView.fontChanged()
+
+        @setActiveTerminal(@createTerminal())
+
+        @activeTerminal.updateTerminalSize()
+
+        @$ = $
+        window.termrk = @
+
+    setupElements: ->
         @container = @createContainer()
 
         @panel = atom.workspace.addBottomPanel(
@@ -54,33 +88,6 @@ module.exports = Termrk =
         @containerView.on 'resize', ->
             console.log 'container resize' if window.debug?
 
-        @commands =
-            'termrk:toggle':            => @toggle()
-            'termrk:hide':              => @hide()
-            'termrk:show':              => @show()
-            'termrk:create-terminal':   =>
-                @setActiveTerminal(@createTerminal())
-            'termrk:close-terminal':   =>
-                @removeTerminal(@getActiveTerminal())
-            'termrk:activate-next-terminal':   =>
-                @setActiveTerminal(@getNextTerminal())
-            'termrk:activate-previous-terminal':   =>
-                @setActiveTerminal(@getPreviousTerminal())
-
-        @configKeys =
-            'fontSize':   -> TermrkView.fontChanged()
-            'fontFamily': -> TermrkView.fontChanged()
-
-        @subscriptions.add atom.commands.add 'atom-workspace', @commands
-        @subscriptions.add Config.observe @configKeys
-
-        @setActiveTerminal(@createTerminal())
-
-        @activeTerminal.updateTerminalSize()
-
-        @$ = $
-        window.termrk = @
-
     ###
     Section: elements/views creation
     ###
@@ -90,12 +97,11 @@ module.exports = Termrk =
         container.classList.add 'termrk-container'
         return container
 
-    createTerminal: () ->
-        termrkView = new TermrkView()
+    createTerminal: (options={}) ->
+        termrkView = new TermrkView(options)
         termrkView.height(0)
 
         @terminals[termrkView.time] = termrkView
-
         @containerView.append termrkView
 
         return termrkView
@@ -136,7 +142,6 @@ module.exports = Termrk =
         return @activeTerminal
 
     setActiveTerminal: (term) ->
-        console.log 'set active:', term if window.debug?
         return if term is @activeTerminal
         @activeTerminal?.animatedHide()
         @activeTerminal?.deactivated()
@@ -151,7 +156,9 @@ module.exports = Termrk =
             nextTerm = @getNextTerminal()
             term.animatedHide(-> term.destroy())
             if term isnt nextTerm
-                nextTerm.animatedShow()
+                @setActiveTerminal(nextTerm)
+            else
+                @setActiveTerminal(@createTerminal())
         else
             term.destroy()
 
@@ -185,6 +192,9 @@ module.exports = Termrk =
     ###
     Section: helpers
     ###
+
+    registerCommands: (target, commands) ->
+        @subscriptions.add atom.commands.add target, commands
 
     getPanelHeight: ->
         @panelHeight

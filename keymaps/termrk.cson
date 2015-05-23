@@ -6,13 +6,19 @@
 
 # in termrk view
 '.termrk':
-    'enter':          'native!'
-    'backspace':      'native!'
-    'tab':            'native!'
-    'delete':         'native!'
-    'insert':         'native!'
+    'enter':     'native!'
+    'backspace': 'native!'
+    'tab':       'native!'
+    'delete':    'native!'
+    'insert':    'native!'
+    'left':      'native!'
+    'right':     'native!'
+    'up':        'native!'
+    'down':      'native!'
+    'ctrl-c':    'native!'
 
     'escape':         'termrk:hide'
+    'ctrl-escape':    'termrk:close-terminal'
     'ctrl-space':     'termrk:create-terminal'
     'ctrl-tab':       'termrk:activate-next-terminal'
     'ctrl-shift-tab': 'termrk:activate-previous-terminal'
