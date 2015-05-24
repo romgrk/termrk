@@ -84,7 +84,7 @@ class TermrkModel
 
         options.name = options.name ? 'xterm-256color'
         options.cwd  = options.cwd ? Config.getStartingDir()
-        options.cols = 80
+        options.cols = 400
         options.rows = 24
 
         try
@@ -139,3 +139,9 @@ class TermrkModel
 
     destroy: ->
         @process.kill()
+
+    getView: ->
+        @view
+
+    setView: (view) ->
+        @view = view

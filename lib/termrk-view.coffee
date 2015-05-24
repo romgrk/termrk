@@ -78,6 +78,8 @@ class TermrkView extends View
         TermrkView.addInstance this
         @time  = String(Date.now())
 
+        @model.setView this
+
         @emitter = new Emitter
         @subscriptions = new CompositeDisposable
 
@@ -89,12 +91,10 @@ class TermrkView extends View
         @registerCommands '.termrk',
             'core:paste': => @paste()
 
-        @updateFont()
-
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
         @terminal = new Terminal
-            cols: 80
+            cols: 400
             rows: 24
             screenKeys: true
         @terminal.open @element
@@ -118,6 +118,7 @@ class TermrkView extends View
             @input.focus()
 
         @model.onDidStartProcess (shellName) =>
+            @updateTerminalSize()
             @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
         @model.onDidExitProcess (code, signal) =>
             @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
@@ -173,6 +174,7 @@ class TermrkView extends View
         parent = @getParent()
         width  = parent.width()
         height = @getPanelHeight()
+        console.log width, height
 
         font       = @terminalView.css('font')
         fontWidth  = Font.getWidth("a", font)
