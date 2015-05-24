@@ -57,4 +57,10 @@ class TermrkConfig extends Config
             when 'project' then Paths.project()
             else process.cwd()
 
-module.exports = new TermrkConfig('termrk')
+# Test package name, apm is case-sensitive sometimes
+if atom.packages.getLoadedPackage('termrk')?
+    name = 'termrk'
+else
+    name = 'Termrk'
+
+module.exports = new TermrkConfig(name)
