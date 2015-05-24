@@ -1,6 +1,7 @@
 @import "ui-variables";
 
 atom-panel.termrk-panel {
+    position:   relative;
     width:      100%;
     box-sizing: content-box;
     border-top: 5px solid @tool-panel-border-color;
@@ -14,18 +15,25 @@ atom-panel.termrk-panel .termrk-container {
     background-color: black;
 }
 
+atom-panel.termrk-panel .resize-handle {
+    display:  inline-block;
+    position: absolute;
+    z-index: 1;
+    top:      0;
+    left:     0;
+    width:    100%;
+    height:   8px;
+
+    cursor: ns-resize;
+    background-color: fade(#0e14cd, 50%);
+}
+
 .termrk-container .termrk {
     position: relative;
     height: 300px;
     overflow: hidden;
     // overflow-y: auto;
     // overflow-x: auto;
-
-    .container {
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-    }
 
     .pid-label {
         position:         absolute;

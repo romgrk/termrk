@@ -62,7 +62,6 @@ module.exports = Termrk =
             'fontFamily': -> TermrkView.fontChanged()
 
         @setActiveTerminal(@createTerminal())
-
         @activeTerminal.updateTerminalSize()
 
         @$ = $
@@ -93,10 +92,22 @@ module.exports = Termrk =
     Section: elements/views creation
     ###
 
+    # createContainer: ->
+    #     container = document.createElement('div')
+    #     container.classList.add 'termrk-container'
+    #
+    #     resizeHandle = document.createElement('div')
+    #     resizeHandle.classList.add 'resize-handle'
+    #
+    #     container.appendChild resizeHandle
+    #
+    #     return container
+
     createContainer: ->
-        container = document.createElement('div')
-        container.classList.add 'termrk-container'
-        return container
+        $$ ->
+            @div class: 'resize-container', =>
+                @div class: 'resize-handle'
+                @div class: 'termrk-container'
 
     createTerminal: (options={}) ->
         model = new TermrkModel(options)
@@ -172,7 +183,8 @@ module.exports = Termrk =
 
     hide: ->
         return unless @panel.isVisible()
-        @panelHeight = @panelView.height()
+
+        @panelView.stop()
         @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
             @panel.hide()
             @activeTerminal.deactivated()
@@ -182,6 +194,7 @@ module.exports = Termrk =
         return if @panel.isVisible()
         @storeFocusedElement()
         @panel.show()
+        @panelView.stop()
         @panelView.transition {height: @panelHeight}, 250, 'ease-in-out', =>
             @activeTerminal.activated()
 

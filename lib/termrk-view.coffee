@@ -89,7 +89,7 @@ class TermrkView extends View
         @attachListeners()
 
         @registerCommands '.termrk',
-            'core:paste': => @paste()
+            'core:paste': => @model.paste()
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
