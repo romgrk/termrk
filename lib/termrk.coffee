@@ -1,5 +1,6 @@
 
 
+interact              = require 'interact.js'
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 $                     = require 'jquery.transit'
@@ -62,7 +63,6 @@ module.exports = Termrk =
             'fontFamily': -> TermrkView.fontChanged()
 
         @setActiveTerminal(@createTerminal())
-        @activeTerminal.updateTerminalSize()
 
         @$ = $
         window.termrk = @
@@ -88,26 +88,31 @@ module.exports = Termrk =
         @containerView.on 'resize', ->
             console.log 'container resize' if window.debug?
 
+        @makeResizable '.termrk-panel'
+
+    makeResizable: (element) ->
+        interact(element)
+        .resizable
+            edges: { left: false, right: false, bottom: false, top: true }
+        .on 'resizemove', (event) ->
+            target = event.target
+            target.style.height = event.rect.height + 'px';
+
+            y = (parseFloat(target.getAttribute('data-y')) || 0)
+            y += event.deltaRect.top;
+            # target.style.webkitTransform = target.style.transform =
+                # 'translate(0px,' + y + 'px)';
+            target.setAttribute('data-y', y);
+        .on 'resizeend', (event) =>
+            @activeTerminal.updateTerminalSize()
+
     ###
     Section: elements/views creation
     ###
 
-    # createContainer: ->
-    #     container = document.createElement('div')
-    #     container.classList.add 'termrk-container'
-    #
-    #     resizeHandle = document.createElement('div')
-    #     resizeHandle.classList.add 'resize-handle'
-    #
-    #     container.appendChild resizeHandle
-    #
-    #     return container
-
     createContainer: ->
         $$ ->
-            @div class: 'resize-container', =>
-                @div class: 'resize-handle'
-                @div class: 'termrk-container'
+            @div class: 'termrk-container'
 
     createTerminal: (options={}) ->
         model = new TermrkModel(options)
@@ -118,6 +123,7 @@ module.exports = Termrk =
         @containerView.append termrkView
 
         return termrkView
+
 
     ###
     Section: terminals management

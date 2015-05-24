@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "fs-plus": "^2.8.1",
+    "interact.js": "^1.2.4",
     "jquery": "^2.1.4",
     "jquery.transit": "^0.9.12",
     "keykit": "^1.1.5",

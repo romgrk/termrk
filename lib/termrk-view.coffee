@@ -118,7 +118,6 @@ class TermrkView extends View
             @input.focus()
 
         @model.onDidStartProcess (shellName) =>
-            @updateTerminalSize()
             @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
         @model.onDidExitProcess (code, signal) =>
             @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
@@ -156,25 +155,24 @@ class TermrkView extends View
     Section: display/render
     ###
 
-    # Public: animate height to 0px.
+    # Public: animate height to fill the container.
     animatedShow: (cb) ->
-        @animate {height: @getPanelHeight()}, 250, ->
+        @stop()
+        @animate {height: '100%'}, 250, =>
+            @updateTerminalSize()
             cb?()
 
-    # Public: animate height to fill the container.
+    # Public: animate height to 0px.
     animatedHide: (cb) ->
-        return if @hidding
-        @hidding = true
-        @animate {height: '0'}, 250, =>
-            @hidding = false
+        @stop()
+        @animate {height: '0'}, 250, ->
             cb?()
 
     # Public: update the terminal cols/rows based on the panel size
     updateTerminalSize: ->
         parent = @getParent()
         width  = parent.width()
-        height = @getPanelHeight()
-        console.log width, height
+        height = parent.height()
 
         font       = @terminalView.css('font')
         fontWidth  = Font.getWidth("a", font)
@@ -184,7 +182,9 @@ class TermrkView extends View
         rows = Math.floor(height / fontHeight)
 
         @terminal.resize(cols, rows)
+        
         @model.resize(cols, rows)
+
         @emitter.emit 'resize', {cols, rows}
 
     # Public: set font from config
