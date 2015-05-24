@@ -1,5 +1,5 @@
 {
-  "name": "Termrk",
+  "name": "termrk",
   "main": "./lib/termrk",
   "version": "0.1.7",
   "description": "Terminal panel inside Atom",
