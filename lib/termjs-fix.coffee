@@ -1,22 +1,21 @@
 
 
-{Terminal} = require('term.js')
+termjs = require('term.js')
 
-mouseListener = (ev) ->
-    unless Terminal.focus
-        return
+class Terminal extends termjs.Terminal
 
-    el = ev.target || ev.srcElement
-    return unless el?
+    @insertStyle: -> return
 
-    while el
-        if (el is Terminal.focus.element)
-            return
-        el = el.parentNode
-
-    Terminal.focus.blur();
-
-Terminal.insertStyle = -> return
-Terminal.bindKeys    = -> document.addEventListener 'mousedown', mouseListener
+    @bindKeys: ->
+        document.addEventListener 'mousedown', (ev) ->
+            unless Terminal.focus
+                return
+            el = ev.target || ev.srcElement
+            return unless el?
+            while el
+                if (el is Terminal.focus.element)
+                    return
+                el = el.parentNode
+            Terminal.focus.blur();
 
 module.exports = Terminal

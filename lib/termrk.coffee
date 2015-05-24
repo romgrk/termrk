@@ -98,12 +98,13 @@ module.exports = Termrk =
             target = event.target
             target.style.height = event.rect.height + 'px';
 
-            y = (parseFloat(target.getAttribute('data-y')) || 0)
-            y += event.deltaRect.top;
+            # y = (parseFloat(target.getAttribute('data-y')) || 0)
+            # y += event.deltaRect.top;
             # target.style.webkitTransform = target.style.transform =
                 # 'translate(0px,' + y + 'px)';
-            target.setAttribute('data-y', y);
+            # target.setAttribute('data-y', y);
         .on 'resizeend', (event) =>
+            event.target.setAttribute 'data-height', event.target.style.height
             @activeTerminal.updateTerminalSize()
 
     ###
@@ -200,8 +201,13 @@ module.exports = Termrk =
         return if @panel.isVisible()
         @storeFocusedElement()
         @panel.show()
+
+        height = @panelView.attr('data-height') ? @panelHeight
+
         @panelView.stop()
-        @panelView.transition {height: @panelHeight}, 250, 'ease-in-out', =>
+        @panelView.transition {
+            height: height
+            }, 250, 'ease-in-out', =>
             @activeTerminal.activated()
 
     toggle: ->

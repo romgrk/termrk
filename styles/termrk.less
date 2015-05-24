@@ -40,16 +40,24 @@ atom-panel.termrk-panel .termrk-container {
         float: none !important;
         border: none;
 
-        // overflow-y: scroll;
         overflow-y: hidden;
         overflow-x: hidden;
 
-        line-height: 1em;
+        display: inline-block;
+        height: 100%;
+
+        line-height: ~"calc(1em " ~"+ 2px)";
         font-size: 14px;
         font-family: "Monospace";
 
         color: #f0f0f0;
         background: #000000;
+
+
+        &> div {
+            height: ~"calc(1em " ~"+ 2px)";
+        }
+
     }
 
     .terminal-cursor {

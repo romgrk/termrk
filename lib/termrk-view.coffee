@@ -90,6 +90,7 @@ class TermrkView extends View
 
         @registerCommands '.termrk',
             'core:paste': => @model.paste()
+            'termrk:insert-filename': => @model.write(atom.workspace.getActiveTextEditor().getURI())
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
@@ -176,13 +177,14 @@ class TermrkView extends View
 
         font       = @terminalView.css('font')
         fontWidth  = Font.getWidth("a", font)
-        fontHeight = Font.getHeight("a", font)
+        fontHeight = @find('.terminal > div:first-of-type').height()
+        # fontHeight = Font.getHeight("a", font)
 
         cols = Math.floor(width / fontWidth)
         rows = Math.floor(height / fontHeight)
 
         @terminal.resize(cols, rows)
-        
+
         @model.resize(cols, rows)
 
         @emitter.emit 'resize', {cols, rows}

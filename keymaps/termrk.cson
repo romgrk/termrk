@@ -23,3 +23,5 @@
     'ctrl-space':     'termrk:create-terminal'
     'ctrl-tab':       'termrk:activate-next-terminal'
     'ctrl-shift-tab': 'termrk:activate-previous-terminal'
+
+    '%': 'termrk:insert-filename'
