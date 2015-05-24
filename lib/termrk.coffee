@@ -36,7 +36,7 @@ module.exports = Termrk =
     config: Config.schema
 
     activate: (state) ->
-        @subscriptions = new CompositeDisposable
+        @subscriptions = new CompositeDisposable()
 
         @setupElements()
 
@@ -58,7 +58,8 @@ module.exports = Termrk =
             'termrk:activate-previous-terminal':   =>
                 @setActiveTerminal(@getPreviousTerminal())
 
-        @subscriptions.add Config.observe
+        # @subscriptions.add Config.observe
+        console.log Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
 

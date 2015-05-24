@@ -108,7 +108,7 @@ class TermrkModel
     Section: commands
     ###
 
-    # Public: write data to the process
+    # Public: writes data to the process
     write: (data) ->
         @process.write(data)
 
@@ -121,11 +121,9 @@ class TermrkModel
         else
             @process.resize(cols, rows)
 
-
     # Public: writes text from clipboard to terminal
     paste: ->
         @process.write atom.clipboard.read()
-        @focus()
 
     ###
     Section: get/set/utils

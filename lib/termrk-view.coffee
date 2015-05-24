@@ -80,8 +80,8 @@ class TermrkView extends View
 
         @model.setView this
 
-        @emitter = new Emitter
-        @subscriptions = new CompositeDisposable
+        @emitter = new Emitter()
+        @subscriptions = new CompositeDisposable()
 
         @input = @element.querySelector 'input'
         @setupTerminalElement()
@@ -99,7 +99,6 @@ class TermrkView extends View
             rows: 24
             screenKeys: true
         @terminal.open @element
-        @terminal.on 'data', (data) => @model.write(data)
 
         @terminalView = @find('.terminal')
 
@@ -107,7 +106,6 @@ class TermrkView extends View
     attachListeners: ->
         @input.addEventListener 'keydown', @keydownListener.bind(@), true
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
-
         @input.addEventListener 'focus', =>
             @terminal.focus()
             return true
@@ -117,6 +115,8 @@ class TermrkView extends View
 
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
+        @terminal.on 'data', (data) =>
+            @model.write(data)
 
         @model.onDidStartProcess (shellName) =>
             @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
@@ -124,6 +124,9 @@ class TermrkView extends View
             @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
         @model.onDidReceiveData (data) =>
             @terminal.write data
+
+        $(window).on 'resize', =>
+            @updateTerminalSize()
 
     ###
     Section: event listeners
