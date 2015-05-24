@@ -1,3 +1,7 @@
+## 0.1.9
+* Fix paste issue
+* Add resize to panel
+
 ## 0.1.7
 * Paste to terminal is supported, with command 'core:paste'
 
