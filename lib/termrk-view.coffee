@@ -38,6 +38,7 @@ class TermrkView extends View
     @fontChanged: =>
         @instances.forEach (instance) ->
             instance.updateFont.call(instance)
+            instance.updateTerminalSize.call(instance)
 
     ###
     Section: instance
@@ -99,8 +100,9 @@ class TermrkView extends View
             rows: 24
             screenKeys: true
         @terminal.open @element
-
         @terminalView = @find('.terminal')
+
+        @updateFont()
 
     # Private: attach listeners
     attachListeners: ->
@@ -197,7 +199,6 @@ class TermrkView extends View
         @terminalView.css
             'font-size':   Config.get('fontSize')
             'font-family': Config.get('fontFamily')
-        @updateTerminalSize()
 
     # Public: get the actual untoggled height
     getPanelHeight: ->

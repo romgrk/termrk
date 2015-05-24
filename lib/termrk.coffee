@@ -126,7 +126,6 @@ module.exports = Termrk =
 
         return termrkView
 
-
     ###
     Section: terminals management
     ###

@@ -17,6 +17,10 @@
     'down':      'native!'
     'ctrl-c':    'native!'
     'ctrl-y':    'native!'
+    'pageup':    'native!'
+    'pagedown':    'native!'
+
+    'shift-insert': 'core:paste'
 
     'escape':         'termrk:hide'
     'ctrl-escape':    'termrk:close-terminal'
