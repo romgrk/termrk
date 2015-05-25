@@ -18,7 +18,7 @@
     'ctrl-c':    'native!'
     'ctrl-y':    'native!'
     'pageup':    'native!'
-    'pagedown':    'native!'
+    'pagedown':  'native!'
 
     'shift-insert': 'core:paste'
 
@@ -28,4 +28,5 @@
     'ctrl-tab':       'termrk:activate-next-terminal'
     'ctrl-shift-tab': 'termrk:activate-previous-terminal'
 
-    '%': 'termrk:insert-filename'
+    '%': 'termrk:abort-keybinding'
+    '% f': 'termrk:insert-filename'

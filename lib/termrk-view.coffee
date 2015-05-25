@@ -47,6 +47,7 @@ class TermrkView extends View
     model:         null
     emitter:       null
     subscriptions: null
+    kmSubscriptions: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -57,6 +58,8 @@ class TermrkView extends View
     # Public: {term.js:Terminal} and jQ wrapper of the element
     terminal:     null
     terminalView: null
+
+    isInsertVarMode: false
 
     @content: ->
         @div class: 'termrk', =>
@@ -81,8 +84,8 @@ class TermrkView extends View
 
         @model.setView this
 
-        @emitter = new Emitter()
-        @subscriptions = new CompositeDisposable()
+        @emitter = new Emitter
+        @subscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
         @setupTerminalElement()
@@ -91,7 +94,9 @@ class TermrkView extends View
 
         @registerCommands '.termrk',
             'core:paste': => @model.paste()
-            'termrk:insert-filename': => @model.write(atom.workspace.getActiveTextEditor().getURI())
+            'termrk:insert-filename': =>
+                @model.write(atom.workspace.getActiveTextEditor().getURI())
+            'termrk:abort-keybinding': (e) -> e.abortKeyBinding()
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
@@ -106,36 +111,48 @@ class TermrkView extends View
 
     # Private: attach listeners
     attachListeners: ->
-        @input.addEventListener 'keydown', @keydownListener.bind(@), true
+        add = => @subscriptions.add
+
+        @input.addEventListener 'keydown', @keydown.bind(@), true
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
-        @input.addEventListener 'focus', =>
-            @terminal.focus()
-            return true
-        @input.addEventListener 'blur', =>
-            @terminal.blur()
-            return true
+        @input.addEventListener 'focus', => @terminal.focus()
+        @input.addEventListener 'blur', => @terminal.blur()
+        add => @input.removeAllListeners()
 
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
         @terminal.on 'data', (data) =>
             @model.write(data)
 
-        @model.onDidStartProcess (shellName) =>
+        add @model.onDidStartProcess (shellName) =>
             @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
-        @model.onDidExitProcess (code, signal) =>
+        add @model.onDidExitProcess (code, signal) =>
             @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
-        @model.onDidReceiveData (data) =>
+        add @model.onDidReceiveData (data) =>
             @terminal.write data
 
-        $(window).on 'resize', =>
+        console.log $(window).on 'resize', =>
             @updateTerminalSize()
+
+    attachKeymapListeners: ->
+        @kmSubscriptions = new CompositeDisposable
+        @kmSubscriptions.add atom.keymaps.onDidPartiallyMatchBindings (event) ->
+            return unless event?
+            for binding in event.partiallyMatchedBindings
+                # if /^termrk:insert/.test binding.command
+                if /^termrk:/.test binding.command
+                    console.log binding.keystrokes, binding.command
+        @kmSubscriptions.add atom.keymaps.onDidFailToMatchBinding (event) ->
+            console.log event.keystrokes, 'nomatch'
+        @kmSubscriptions.add atom.keymaps.onDidMatchBinding (event) ->
+            console.log event.keystrokes, 'match', event.binding.command
 
     ###
     Section: event listeners
     ###
 
     # Private: callback
-    keydownListener: (event) =>
+    keydown: (event) =>
         atom.keymaps.handleKeyboardEvent(event)
 
         if event.defaultPrevented
@@ -145,15 +162,22 @@ class TermrkView extends View
             allow = @terminal.keyDown.call(@terminal, event)
             return allow
 
+    keypress: (event) ->
+        if @isInsertVarMode
+            @_keypressEvent = event
+
     # Public: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
         @focus()
+        @attachKeymapListeners() unless @kmSubscriptions?
         @pidLabel.addClass 'fade-out'
 
     # Public: called after this terminal view has been deactivated
     deactivated: ->
         return unless document.activeElement is @input
+        console.log @kmSubscriptions
+        @kmSubscriptions.dispose() if @kmSubscriptions?
         @pidLabel.removeClass 'fade-out'
         @blur()
 
@@ -207,10 +231,12 @@ class TermrkView extends View
     # Public:
     focus: ->
         @input.focus()
+        return true
 
     # Public:
     blur: ->
         @input.blur()
+        return true
 
     ###
     Section: helpers/utils
@@ -219,6 +245,10 @@ class TermrkView extends View
     # Private: registers commands
     registerCommands: (target, commands) ->
         @subscriptions.add atom.commands.add target, commands
+
+    # Private: add subscription
+    subscribe: (disposable) ->
+        @subscriptions.add disposable
 
     # Public: returns an object that can be retrieved when package is activated
     serialize: ->

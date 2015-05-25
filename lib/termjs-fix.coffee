@@ -18,4 +18,12 @@ class Terminal extends termjs.Terminal
                 el = el.parentNode
             Terminal.focus.blur();
 
+    focus: ->
+        super()
+        return true
+
+    blur: ->
+        super()
+        return true
+
 module.exports = Terminal
