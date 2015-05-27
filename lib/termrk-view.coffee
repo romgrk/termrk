@@ -172,8 +172,9 @@ class TermrkView extends View
             @_keypressEvent = event
 
     terminalMousewheel: (event) =>
-        deltaY = event.wheelDeltaY
+        deltaY  = event.wheelDeltaY
         deltaY /= 120
+        deltaY *= -1
 
         @terminal.scrollDisp(deltaY)
 
