@@ -6,19 +6,22 @@
 
 # in termrk view
 '.termrk':
-    'enter':     'native!'
-    'backspace': 'native!'
-    'tab':       'native!'
-    'delete':    'native!'
-    'insert':    'native!'
-    'left':      'native!'
-    'right':     'native!'
-    'up':        'native!'
-    'down':      'native!'
+    'enter':           'native!'
+    'backspace':       'native!'
+    'shift-backspace': 'native!'
+    'tab':             'native!'
+    'delete':          'native!'
+    'insert':          'native!'
+    'left':            'native!'
+    'right':           'native!'
+    'up':              'native!'
+    'down':            'native!'
+    'pageup':          'native!'
+    'pagedown':        'native!'
+
     'ctrl-c':    'native!'
+    'ctrl-x':    'native!'
     'ctrl-y':    'native!'
-    'pageup':    'native!'
-    'pagedown':  'native!'
 
     'shift-insert': 'core:paste'
 
