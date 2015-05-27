@@ -1,3 +1,7 @@
+## 0.1.12
+* ctrl-alt-shift-space inserts current selection in terminal (command: `termrk:insert-selection`)
+* `shift-backspace` and `ctrl-x` now treated as `native!`
+
 ## 0.1.11
 * Terminal now supports scrolling
 

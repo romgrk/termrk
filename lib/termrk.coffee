@@ -29,8 +29,8 @@ module.exports = Termrk =
     subscriptions: null
 
     # Public: {TerminalView} list and active view
-    terminals:      {}
-    activeTerminal: null
+    views:      {}
+    activeView: null
 
     # Private: config description
     config: Config.schema
@@ -44,6 +44,8 @@ module.exports = Termrk =
             'termrk:toggle':            => @toggle()
             'termrk:hide':              => @hide()
             'termrk:show':              => @show()
+            'termrk:insert-selection':  @insertSelection.bind(@)
+
             'termrk:create-terminal':   =>
                 @setActiveTerminal(@createTerminal())
             'termrk:create-terminal-current-dir': =>
@@ -106,7 +108,7 @@ module.exports = Termrk =
             # target.setAttribute('data-y', y);
         .on 'resizeend', (event) =>
             event.target.setAttribute 'data-height', event.target.style.height
-            @activeTerminal.updateTerminalSize()
+            @activeView.updateTerminalSize()
 
     ###
     Section: elements/views creation
@@ -121,58 +123,58 @@ module.exports = Termrk =
         termrkView = new TermrkView(model)
         termrkView.height(0)
 
-        @terminals[termrkView.time] = termrkView
+        @views[termrkView.time] = termrkView
         @containerView.append termrkView
 
         return termrkView
 
     ###
-    Section: terminals management
+    Section: views management
     ###
 
     getPreviousTerminal: ->
-        keys  = Object.keys(@terminals).sort()
+        keys  = Object.keys(@views).sort()
 
-        unless @activeTerminal?
+        unless @activeView?
             return null if keys.length is 0
-            return @terminals[keys[0]]
+            return @views[keys[0]]
 
-        index = keys.indexOf @activeTerminal.time
+        index = keys.indexOf @activeView.time
         index = if index is 0 then (keys.length - 1) else (index - 1)
         key   = keys[index]
 
-        return @terminals[key]
+        return @views[key]
 
     getNextTerminal: ->
-        keys  = Object.keys(@terminals).sort()
+        keys  = Object.keys(@views).sort()
 
-        unless @activeTerminal?
+        unless @activeView?
             return null if keys.length is 0
-            return @terminals[keys[0]]
+            return @views[keys[0]]
 
-        index = keys.indexOf @activeTerminal.time
+        index = keys.indexOf @activeView.time
         index = (index + 1) % keys.length
         key   = keys[index]
 
-        return @terminals[key]
+        return @views[key]
 
     getActiveTerminal: ->
-        return @activeTerminal if @activeTerminal?
+        return @activeView if @activeView?
         @setActiveTerminal(@createTerminal())
-        return @activeTerminal
+        return @activeView
 
     setActiveTerminal: (term) ->
-        return if term is @activeTerminal
-        @activeTerminal?.animatedHide()
-        @activeTerminal?.deactivated()
-        @activeTerminal = term
-        @activeTerminal.animatedShow()
-        @activeTerminal.activated()
+        return if term is @activeView
+        @activeView?.animatedHide()
+        @activeView?.deactivated()
+        @activeView = term
+        @activeView.animatedShow()
+        @activeView.activated()
 
     removeTerminal: (term) ->
-        return unless @terminals[term.time]?
+        return unless @views[term.time]?
 
-        if term is @activeTerminal
+        if term is @activeView
             nextTerm = @getNextTerminal()
             term.animatedHide(-> term.destroy())
             if term isnt nextTerm
@@ -182,22 +184,23 @@ module.exports = Termrk =
         else
             term.destroy()
 
-        delete @terminals[term.time]
+        delete @views[term.time]
 
     ###
     Section: commands handlers
     ###
 
-    hide: ->
+    hide: (callback) ->
         return unless @panel.isVisible()
 
         @panelView.stop()
         @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
             @panel.hide()
-            @activeTerminal.deactivated()
+            @activeView.deactivated()
             @restoreFocus()
+            callback?()
 
-    show: ->
+    show: (callback) ->
         return if @panel.isVisible()
         @storeFocusedElement()
         @panel.show()
@@ -208,7 +211,8 @@ module.exports = Termrk =
         @panelView.transition {
             height: height
             }, 250, 'ease-in-out', =>
-            @activeTerminal.activated()
+            @activeView.activated()
+            callback?()
 
     toggle: ->
         if @panel.isVisible()
@@ -216,9 +220,29 @@ module.exports = Termrk =
         else
             @show()
 
+    insertSelection: (event) ->
+        return unless @activeView?
+
+        unless @panel.isVisible()
+            @show @insertSelection.bind(@)
+        else
+            editor    = atom.workspace.getActiveTextEditor()
+            selection = editor.getSelections()[0]
+            terminal  = @activeView.getModel()
+
+            text = selection.getText()
+            text = text.replace /(\n)/g, '\\$1'
+
+            terminal.write text
+
+            @activeView.focus()
+
     ###
     Section: helpers
     ###
+
+    shellEscape: (s) ->
+        s.replace(/(["\n'$`\\])/g,'\\$1')
 
     registerCommands: (target, commands) ->
         @subscriptions.add atom.commands.add target, commands
@@ -233,7 +257,7 @@ module.exports = Termrk =
         @focusedElement?.focus()
 
     deactivate: ->
-        for time, term of @terminals
+        for time, term of @views
             term.destroy()
         @panel.destroy()
         @subscriptions.dispose()

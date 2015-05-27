@@ -167,10 +167,12 @@ class TermrkView extends View
             allow = @terminal.keyDown.call(@terminal, event)
             return allow
 
+    # Private: callback
     keypress: (event) ->
         if @isInsertVarMode
             @_keypressEvent = event
 
+    # Private: callback
     terminalMousewheel: (event) =>
         deltaY  = event.wheelDeltaY
         deltaY /= 120
@@ -224,6 +226,9 @@ class TermrkView extends View
         cols = Math.floor(width / fontWidth)
         rows = Math.floor(height / fontHeight)
 
+        # FIXME avoid terminal being resized when panel is showing
+        return if cols == 100
+
         @terminal.resize(cols, rows)
 
         @model.resize(cols, rows)
@@ -276,3 +281,6 @@ class TermrkView extends View
 
     getParent: ->
         $(@parent()[0])
+
+    getModel: ->
+        @model

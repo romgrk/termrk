@@ -110,6 +110,7 @@ class TermrkModel
 
     # Public: writes data to the process
     write: (data) ->
+        console.log JSON.stringify data if window.debug? and window.debug = true
         @process.write(data)
 
     # Public: resize the process buffer

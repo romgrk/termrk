@@ -3,11 +3,10 @@
 Termrk is an implementation of the excellent [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.
 Spawns your default system shell inside atom.
 
-*Not yet tested on Windows/OSX, feedback is welcome.*
-
 The example below illustrates **termrk** running *zsh*. (see *vim* demo at the end)
 
 ![basic](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
 
 ## Install
 
@@ -21,6 +20,7 @@ apm install termrk
 
 - `alt-space`:      toggle terminal panel
 - `ctrl-alt-space`: create terminal in current file's dir
+- `ctrl-alt-shift-space`: insert current selection in active terminal
 
 #### inside terminal
 
@@ -42,6 +42,23 @@ apm install termrk
 Name | Action | Scope, Key
 --|--
 `termrk:hide` | Hide termrk panel | `.termrk`, `escape`
+`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-shift-space`
+
+## Styling
+
+Example, for black text on white bg, and blue cursor-bg.
+
+```less
+.termrk .terminal {
+    color: black;
+    background-color: blue;
+}
+
+.termrk .terminal-cursor {
+    color: black;
+    background-color: white;
+}
+```
 
 ## Selection
 

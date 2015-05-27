@@ -36,7 +36,7 @@ class TermrkConfig extends Config
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
-
+            
     # Public: get default system shell
     getDefaultShell: ->
         shell = @get 'shellCommand'
