@@ -1,3 +1,6 @@
+## 0.1.11
+* Terminal now supports scrolling
+
 ## 0.1.10
 * Add % binding: insert current file name in terminal
 

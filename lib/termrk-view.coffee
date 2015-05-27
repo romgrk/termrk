@@ -121,6 +121,8 @@ class TermrkView extends View
 
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
+        @terminal.element.addEventListener 'mousewheel', @terminalMousewheel.bind(@)
+
         @terminal.on 'data', (data) =>
             @model.write(data)
 
@@ -141,11 +143,14 @@ class TermrkView extends View
             for binding in event.partiallyMatchedBindings
                 # if /^termrk:insert/.test binding.command
                 if /^termrk:/.test binding.command
-                    console.log binding.keystrokes, binding.command
+                    return
+                    # console.log binding.keystrokes, binding.command
         @kmSubscriptions.add atom.keymaps.onDidFailToMatchBinding (event) ->
-            console.log event.keystrokes, 'nomatch'
+            return
+            # console.log event.keystrokes, 'nomatch'
         @kmSubscriptions.add atom.keymaps.onDidMatchBinding (event) ->
-            console.log event.keystrokes, 'match', event.binding.command
+            return
+            # console.log event.keystrokes, 'match', event.binding.command
 
     ###
     Section: event listeners
@@ -165,6 +170,12 @@ class TermrkView extends View
     keypress: (event) ->
         if @isInsertVarMode
             @_keypressEvent = event
+
+    terminalMousewheel: (event) =>
+        deltaY = event.wheelDeltaY
+        deltaY /= 120
+
+        @terminal.scrollDisp(deltaY)
 
     # Public: called after this terminal view has been activated
     activated: ->
