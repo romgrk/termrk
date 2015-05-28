@@ -190,7 +190,6 @@ class TermrkView extends View
     # Public: called after this terminal view has been deactivated
     deactivated: ->
         return unless document.activeElement is @input
-        console.log @kmSubscriptions
         @kmSubscriptions.dispose() if @kmSubscriptions?
         @pidLabel.removeClass 'fade-out'
         @blur()

@@ -67,8 +67,6 @@ Example, for black text on white bg, and blue cursor-bg.
 The activation sequence is `ctrl-a [`. Once there, you can move cursor the same way vim's normal-mode does. Press `v` to plant selection tail and start `visual mode`. Move again with normal-mode keys. Press `y` to *y*ank (vim's term for *copy*) selection.
 
 **Important note**: to get out of the `ctrl-a [` mode, the key is `escape`. However, it is currently mapped to `termrk:hide`. Unmap it before using `ctrl-a [` mode.
-I'll check if I can add an escape escape key.
-
 
 ### Features
 - Toggle panel (slide up)
