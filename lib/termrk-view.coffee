@@ -20,6 +20,9 @@ Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
+# Makes it more readable when callback is inline
+delay = (ms, callback) -> setTimeout(callback, ms)
+
 module.exports =
 class TermrkView extends View
 
@@ -96,7 +99,7 @@ class TermrkView extends View
             'core:paste': => @model.paste()
             'termrk:insert-filename': =>
                 @model.write(atom.workspace.getActiveTextEditor().getURI())
-            'termrk:abort-keybinding': (e) -> e.abortKeyBinding()
+            'termrk:trigger-keypress': @triggerKeypress.bind(@)
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
@@ -113,7 +116,7 @@ class TermrkView extends View
     attachListeners: ->
         add = => @subscriptions.add
 
-        @input.addEventListener 'keydown', @keydown.bind(@), true
+        @input.addEventListener 'keydown', @inputKeydown.bind(@), true
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
         @input.addEventListener 'focus', => @terminal.focus()
         @input.addEventListener 'blur', => @terminal.blur()
@@ -138,26 +141,15 @@ class TermrkView extends View
 
     attachKeymapListeners: ->
         @kmSubscriptions = new CompositeDisposable
-        @kmSubscriptions.add atom.keymaps.onDidPartiallyMatchBindings (event) ->
-            return unless event?
-            for binding in event.partiallyMatchedBindings
-                # if /^termrk:insert/.test binding.command
-                if /^termrk:/.test binding.command
-                    return
-                    # console.log binding.keystrokes, binding.command
-        @kmSubscriptions.add atom.keymaps.onDidFailToMatchBinding (event) ->
-            return
-            # console.log event.keystrokes, 'nomatch'
-        @kmSubscriptions.add atom.keymaps.onDidMatchBinding (event) ->
-            return
-            # console.log event.keystrokes, 'match', event.binding.command
+        @kmSubscriptions.add(
+            atom.keymaps.onDidFailToMatchBinding @keymapBindingFailed)
 
     ###
     Section: event listeners
     ###
 
     # Private: callback
-    keydown: (event) =>
+    inputKeydown: (event) =>
         atom.keymaps.handleKeyboardEvent(event)
 
         if event.defaultPrevented
@@ -168,11 +160,6 @@ class TermrkView extends View
             return allow
 
     # Private: callback
-    keypress: (event) ->
-        if @isInsertVarMode
-            @_keypressEvent = event
-
-    # Private: callback
     terminalMousewheel: (event) =>
         deltaY  = event.wheelDeltaY
         deltaY /= 120
@@ -180,11 +167,18 @@ class TermrkView extends View
 
         @terminal.scrollDisp(deltaY)
 
+    # Private: insert character from passed event.
+    triggerKeypress: (event) =>
+        keystroke = KeyKit.fromKBEvent event.originalEvent
+        if keystroke.char?
+            keypressEvent = KeyKit.createKBEvent 'keypress', keystroke
+            @input.dispatchEvent keypressEvent
+
     # Public: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
         @focus()
-        @attachKeymapListeners() unless @kmSubscriptions?
+        # @attachKeymapListeners() unless @kmSubscriptions?
         @pidLabel.addClass 'fade-out'
 
     # Public: called after this terminal view has been deactivated

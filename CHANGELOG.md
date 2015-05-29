@@ -8,6 +8,7 @@
   ```
 * make text inside terminal selectable
 * make selection-style use `@background-color-selected`, or default as white
+* insert '%' if it is not followed by 'f'
 
 ## 0.1.13
 * fix: % catched by command

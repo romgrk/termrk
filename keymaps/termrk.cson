@@ -33,5 +33,5 @@
     'ctrl-tab':       'termrk:activate-next-terminal'
     'ctrl-shift-tab': 'termrk:activate-previous-terminal'
 
-    # '%': 'termrk:abort-keybinding'
+    '%': 'termrk:trigger-keypress'
     '% f': 'termrk:insert-filename'
