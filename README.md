@@ -24,7 +24,6 @@ apm install termrk
 
 #### inside terminal
 
-- `escape`:         hide panel
 - `ctrl-escape`:    close current terminal
 - `ctrl-space`:     create terminal
 - `ctrl-tab`:       activate next terminal
@@ -39,10 +38,18 @@ apm install termrk
 
 ## Commands
 
-Name | Action | Scope, Key
+Name | Action | Binding (Scope, Key)
 --|--
-`termrk:hide` | Hide termrk panel | `.termrk`, `escape`
-`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-shift-space`
+`termrk:toggle` | Toggle termrk panel | `atom-workspace`, `alt-space`
+`termrk:hide` | Hide termrk panel | none
+`termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace`, `ctrl-alt-space`
+`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-sphift-space`
+`termrk:close-terminal` | Close active terminal session | `.termrk`, `ctrl-escape`
+`termrk:insert-filename` | Insert current file's path in terminal | `.termrk`, `% f`
+
+Other:
+`termrk:create-terminal`, `termrk:activate-next-terminal`,
+`termrk:activate-previous-terminal`
 
 ## Styling
 
@@ -60,19 +67,19 @@ Example, for black text on white bg, and blue cursor-bg.
 }
 ```
 
-## Selection
+## Tmux-like selection mode
 
 *This feature is from [term.js][term] module. ~~Accurate~~ documentation can be found on the README.md of term.js*
 
 The activation sequence is `ctrl-a [`. Once there, you can move cursor the same way vim's normal-mode does. Press `v` to plant selection tail and start `visual mode`. Move again with normal-mode keys. Press `y` to *y*ank (vim's term for *copy*) selection.
+Exit with escape.
 
-**Important note**: to get out of the `ctrl-a [` mode, the key is `escape`. However, it is currently mapped to `termrk:hide`. Unmap it before using `ctrl-a [` mode.
 
 ### Features
 - Toggle panel (slide up)
 - Switch between terminals
-- Paste to terminal
-- Set font options
+- Copy/paste from/to terminal
+- Set font and color options
 - Scrolling
 
 ___

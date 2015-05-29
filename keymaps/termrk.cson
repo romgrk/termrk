@@ -19,6 +19,7 @@
     'down':            'native!'
     'pageup':          'native!'
     'pagedown':        'native!'
+    'escape':          'native!'
 
     'ctrl-c':    'native!'
     'ctrl-u':    'native!'
@@ -27,7 +28,6 @@
 
     'shift-insert': 'core:paste'
 
-    'escape':         'termrk:hide'
     'ctrl-escape':    'termrk:close-terminal'
     'ctrl-space':     'termrk:create-terminal'
     'ctrl-tab':       'termrk:activate-next-terminal'

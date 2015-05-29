@@ -1,3 +1,14 @@
+## 0.1.15
+* **Note:** `escape` has been unbound of `termrk:hide`, because
+  it is an important key in terminal. If you still want it to
+  act as before, map it in your keymap.cson
+  ```
+  '.termrk':
+    'escape': 'termrk:hide'
+  ```
+* make text inside terminal selectable
+* make selection-style use `@background-color-selected`, or default as white
+
 ## 0.1.13
 * fix: % catched by command
 
