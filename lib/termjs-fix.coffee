@@ -118,6 +118,14 @@ class Terminal extends termjs.Terminal
 
         @addTabindexToChildren()
 
+    refresh: (args...) ->
+
+        if @rows > @element.children.length
+            lastChild = @children.pop()
+            lastChild.remove()
+
+        super(args...)
+
     # resize: (width, height) ->
     #     width = 1 if width < 1
     #     height = 1 if height < 1
