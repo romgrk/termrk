@@ -50,7 +50,6 @@ class TermrkView extends View
     model:         null
     emitter:       null
     subscriptions: null
-    kmSubscriptions: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -120,7 +119,6 @@ class TermrkView extends View
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
         @input.addEventListener 'focus', => @terminal.focus()
         @input.addEventListener 'blur', => @terminal.blur()
-        add => @input.removeAllListeners()
 
         @terminal.element.addEventListener 'focus', =>
             @input.focus()
@@ -136,13 +134,10 @@ class TermrkView extends View
         add @model.onDidReceiveData (data) =>
             @terminal.write data
 
-        console.log $(window).on 'resize', =>
-            @updateTerminalSize()
-
-    attachKeymapListeners: ->
-        @kmSubscriptions = new CompositeDisposable
-        @kmSubscriptions.add(
-            atom.keymaps.onDidFailToMatchBinding @keymapBindingFailed)
+        resizeHandler = @updateTerminalSize.bind(@)
+        window.addEventListener 'resize', resizeHandler
+        add ->
+            window.removeEventListener 'resize', resizeHandler
 
     ###
     Section: event listeners
@@ -178,13 +173,11 @@ class TermrkView extends View
     activated: ->
         @updateTerminalSize()
         @focus()
-        # @attachKeymapListeners() unless @kmSubscriptions?
         @pidLabel.addClass 'fade-out'
 
     # Public: called after this terminal view has been deactivated
     deactivated: ->
         return unless document.activeElement is @input
-        @kmSubscriptions.dispose() if @kmSubscriptions?
         @pidLabel.removeClass 'fade-out'
         @blur()
 
@@ -206,7 +199,7 @@ class TermrkView extends View
             cb?()
 
     # Public: update the terminal cols/rows based on the panel size
-    updateTerminalSize: ->
+    updateTerminalSize: =>
         parent = @getParent()
         width  = parent.width()
         height = parent.height()
