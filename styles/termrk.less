@@ -1,3 +1,5 @@
+@background-color-selected: fade(white, 99%);
+
 @import "ui-variables";
 
 atom-panel.termrk-panel {
@@ -19,8 +21,10 @@ atom-panel.termrk-panel .termrk-container {
     position: relative;
     height: 300px;
     overflow: hidden;
-    // overflow-y: auto;
-    // overflow-x: auto;
+
+    *::selection {
+        background: fade(@background-color-selected, 99%);
+    }
 
     .pid-label {
         position:         absolute;
