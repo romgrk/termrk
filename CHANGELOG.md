@@ -1,3 +1,6 @@
+## 0.1.16
+* disable screenKeys feature
+
 ## 0.1.15
 * **Note:** `escape` has been unbound of `termrk:hide`, because
   it is an important key in terminal. If you still want it to

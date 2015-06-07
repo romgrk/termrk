@@ -105,7 +105,7 @@ class TermrkView extends View
         @terminal = new Terminal
             cols: 400
             rows: 24
-            screenKeys: true
+            screenKeys: false
         @terminal.open @element
         @terminalView = @find('.terminal')
 
