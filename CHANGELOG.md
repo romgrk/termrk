@@ -1,3 +1,8 @@
+## 0.1.18
+* In config, setting startingDir to `cwd` spawns sessions in current file's
+  directory
+* Terminal gains focus after text has been pasted
+
 ## 0.1.16
 * disable screenKeys feature
 
