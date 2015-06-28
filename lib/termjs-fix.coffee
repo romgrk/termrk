@@ -36,9 +36,13 @@ class Terminal extends termjs.Terminal
             unless selection? and selection.type is 'Range'
                 @parentElement.focus()
 
+        mouseUpFunction = ->
+            @focus()
+
         for child in @element.children
             child.tabIndex    = 0
             child.onmousedown = -> true
+            child.onmouseup   = mouseUpFunction
             child.onclick     = clickFunction
 
     # Public: create the terminal-element in the `parent` element

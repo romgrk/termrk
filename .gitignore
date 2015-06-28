@@ -4,3 +4,4 @@ node_modules
 run.coffee
 system.coffee
 cli-status-view.coffee
+.tags*
