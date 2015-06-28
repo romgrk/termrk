@@ -16,7 +16,7 @@ class TermrkConfig extends Config
             default:     'auto-detect'
         'startingDir':
             title:       'Start dir'
-            description: 'Dir where the shell should be started'
+            description: 'Dir where the shell should be started.'
             type:        'string'
             default:     'project'
             enum:        ['home', 'project', 'cwd']
@@ -36,7 +36,7 @@ class TermrkConfig extends Config
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
-            
+
     # Public: get default system shell
     getDefaultShell: ->
         shell = @get 'shellCommand'
@@ -55,6 +55,7 @@ class TermrkConfig extends Config
         switch @get('startingDir')
             when 'home' then Paths.home()
             when 'project' then Paths.project()
+            when 'cwd' then atom.workspace.getActiveTextEditor().getURI()
             else process.cwd()
 
 # Test package name, apm is case-sensitive sometimes
