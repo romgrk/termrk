@@ -206,7 +206,7 @@ module.exports = Termrk =
             callback?()
 
     show: (callback) ->
-        
+
         if @panel.isVisible()
             @activeView?.focus()
             return
@@ -281,7 +281,6 @@ module.exports = Termrk =
         @focusedElement = $(document.activeElement)
 
     restoreFocus: ->
-        console.log @focusedElement
         @focusedElement?.focus()
         @focusedElement = null
 
