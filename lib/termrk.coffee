@@ -206,7 +206,11 @@ module.exports = Termrk =
             callback?()
 
     show: (callback) ->
-        return if @panel.isVisible()
+        
+        if @panel.isVisible()
+            @activeView?.focus()
+            return
+
         @storeFocusedElement()
         @panel.show()
 
