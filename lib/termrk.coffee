@@ -44,6 +44,11 @@ module.exports = Termrk =
             'termrk:toggle':            => @toggle()
             'termrk:hide':              => @hide()
             'termrk:show':              => @show()
+
+            'termrk:toggle-focus':      => @toggleFocus()
+            'termrk:focus':             => @focus()
+            'termrk:blur':              => @blur()
+
             'termrk:insert-selection':  @insertSelection.bind(@)
 
             'termrk:create-terminal':   =>
@@ -237,6 +242,24 @@ module.exports = Termrk =
 
             @activeView.focus()
 
+    focus: () ->
+        unless @panel.isVisible()
+            @show => @focus()
+        else
+            @storeFocusedElement()
+            @activeView.focus()
+
+    blur: () ->
+        @activeView.blur()
+        @restoreFocus()
+
+    toggleFocus: () ->
+        return unless @activeView?
+        if @activeView.hasFocus()
+            @blur()
+        else
+            @focus()
+
     ###
     Section: helpers
     ###
@@ -251,10 +274,12 @@ module.exports = Termrk =
         @panelHeight
 
     storeFocusedElement: ->
-        @focusedElement = document.activeElement
+        @focusedElement = $(document.activeElement)
 
     restoreFocus: ->
+        console.log @focusedElement
         @focusedElement?.focus()
+        @focusedElement = null
 
     deactivate: ->
         for time, term of @views
