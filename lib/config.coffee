@@ -16,7 +16,8 @@ class TermrkConfig extends Config
             default:     'auto-detect'
         'startingDir':
             title:       'Start dir'
-            description: 'Dir where the shell should be started.'
+            description: 'Dir where the shell should be started.' +
+                         '\n*cwd* means current file\'s directory'
             type:        'string'
             default:     'project'
             enum:        ['home', 'project', 'cwd']
