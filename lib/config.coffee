@@ -58,7 +58,7 @@ class TermrkConfig extends Config
             when 'cwd' then atom.workspace.getActiveTextEditor().getURI()
             else process.cwd()
 
-# Test package name, apm is case-sensitive sometimes
+# Test package name, apm is case-sensitive sometimes >> TODO create issue on APM
 if atom.packages.getLoadedPackage('termrk')?
     name = 'termrk'
 else
