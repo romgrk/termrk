@@ -26,6 +26,7 @@ class TermrkConfig extends Config
         'defaultHeight':
             title:       'Panel height'
             description: 'Default height of the terminal-panel (in px)'
+            # TODO let user choose any css value
             type:        'integer'
             default:     300
         'fontSize':
