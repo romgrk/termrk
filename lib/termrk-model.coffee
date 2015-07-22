@@ -8,6 +8,7 @@ pty = require 'pty.js'
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
+{Task} = require 'atom'
 
 window.termjs = require 'term.js' if window.debug?
 
@@ -20,7 +21,6 @@ Utils  = require './utils'
 Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
-
 
 module.exports =
 class TermrkModel
@@ -88,7 +88,7 @@ class TermrkModel
         options.rows = 24
 
         try
-            @process = pty.fork(shell, [], options)
+            @process = Task.once require.resolve('./ptyTask'), shell, [], options
         catch error
             error.message += "\nshell: #{shell}"
             throw error
@@ -110,21 +110,21 @@ class TermrkModel
 
     # Public: writes data to the process
     write: (data) ->
-        # console.log JSON.stringify data 
-        @process.write(data)
+        # console.log JSON.stringify data
+        @process.send(event: 'input', text: data)
 
     # Public: resize the process buffer
     resize: (cols, rows) ->
         if typeof cols is 'object'
-            @process.resize(cols.cols, cols.rows)
+            @process.send(event: 'resize', cols.cols, rows.rows)
         else if _.isArray(cols)
-            @process.resize(cols[0], cols[1])
+            @process.send(event: 'resize', cols[1], rows[1])
         else
-            @process.resize(cols, rows)
+            @process.send(event: 'resize', cols, rows)
 
     # Public: writes text from clipboard to terminal
     paste: ->
-        @process.write atom.clipboard.read()
+        @process.send(event: 'input', text: atom.clipboard.read())
 
     ###
     Section: get/set/utils
