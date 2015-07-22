@@ -88,7 +88,7 @@ class TermrkModel
         options.rows = 24
 
         try
-            @process = Task.once require.resolve('./ptyTask'), shell, [], options
+            @process = Task.once require.resolve('./pty-task'), shell, [], options
         catch error
             error.message += "\nshell: #{shell}"
             throw error
