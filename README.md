@@ -1,4 +1,3 @@
-
 *Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 
 Spawns default system shell in a sliding panel. Supports multiple terminal sessions.
@@ -16,6 +15,7 @@ Running basic bash:
 Running vim:
 
 ![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
+[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
 
 ## Keybindings
 
@@ -41,8 +41,8 @@ Running vim:
 
 ## Commands
 
-Name | Action | Binding (Scope, Key)
---|--|--
+Name | Action | Binding
+---- | ---- | ----
 `termrk:toggle` | Toggle termrk panel | `atom-workspace`, `alt-space`
 `termrk:hide` | Hide termrk panel | none
 `termrk:show` | Show termrk panel | none
