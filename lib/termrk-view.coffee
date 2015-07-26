@@ -159,9 +159,28 @@ class TermrkView extends View
 
     # Private: callback
     terminalMousewheel: (event) =>
-        deltaY  = event.wheelDeltaY
-        deltaY /= 120
-        deltaY *= -1
+        #This breaks everything :(
+        #deltaY  = event.wheelDeltaY
+        #deltaY /= 120
+        #deltaY *= -1
+
+        #Works on OSX only?
+        #deltaY = event.wheelDeltaY
+        #deltaY *= -1
+
+        #Possible catch-all solution?
+        deltaY = event.wheelDeltaY
+
+        #Handle scrolling based on the event type
+        #Based on how term.js handles mouse scrolling
+        if event.type is 'DOMMouseScroll'
+          deltaY += if event.detail < 0 then -1 else 1
+          deltaY *= -1 #Correct scrolling direction
+
+        else
+          deltaY += if event.wheelDeltaY > 0 then -1 else 1
+          deltaY *= -1 #Correct scrolling direction
+
 
         @terminal.scrollDisp(deltaY)
 
