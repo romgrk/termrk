@@ -1,18 +1,21 @@
-# *Termrk* - ultimate terminal
 
-Termrk is an implementation of the excellent [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.
-Spawns your default system shell inside atom.
+*Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 
-The example below illustrates **termrk** running *zsh*. (see *vim* demo at the end)
+Spawns default system shell in a sliding panel. Supports multiple terminal sessions.
+Basic features include inserting current file path, copy/pasting and setting/fonts config.
+
+*If some feature that you'd like to see isn't implemented, don't hesitate to create a request.*
+
+## Examples
+
+Running basic bash:
 
 ![basic](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
 [link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
 
-## Install
+Running vim:
 
-```
-apm install termrk
-```
+![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
 
 ## Keybindings
 
@@ -33,15 +36,19 @@ apm install termrk
 
 ```
 '.termrk':
-  'keystroke': 'native!'
+  'KEYSTROKE_TO_CATCH': 'native!'
 ```
 
 ## Commands
 
 Name | Action | Binding (Scope, Key)
---|--
+--|--|--
 `termrk:toggle` | Toggle termrk panel | `atom-workspace`, `alt-space`
 `termrk:hide` | Hide termrk panel | none
+`termrk:show` | Show termrk panel | none
+`termrk:toggle-focus` | Toggle focus of termrk panel | none
+`termrk:focus` | Focus termrk panel | none
+`termrk:blur` | Blur termrk panel | none
 `termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace`, `ctrl-alt-space`
 `termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-sphift-space`
 `termrk:close-terminal` | Close active terminal session | `.termrk`, `ctrl-escape`
@@ -66,35 +73,6 @@ Example, for black text on white bg, and blue cursor-bg.
     background-color: white;
 }
 ```
-
-## Tmux-like selection mode
-
-*This feature is from [term.js][term] module. ~~Accurate~~ documentation can be found on the README.md of term.js*
-
-The activation sequence is `ctrl-a [`. Once there, you can move cursor the same way vim's normal-mode does. Press `v` to plant selection tail and start `visual mode`. Move again with normal-mode keys. Press `y` to *y*ank (vim's term for *copy*) selection.
-Exit with escape.
-
-
-### Features
-- Toggle panel (slide up)
-- Switch between terminals
-- Copy/paste from/to terminal
-- Set font and color options
-- Scrolling
-
-___
-
-## Vim demo
-
-It is not yet perfect but it is capable of running *vim*.
-The example below illustrates *vim* running on **termrk**.
-
-![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
-
-
-#### Python error upon installation
-If you get a **Python** error, it probably is because the `python` in your path
-is a 3.x version of python. Please make sure your path refers to a 2.7 version of python.
 
 [term]: https://github.com/chjj/term.js
 [pty]:  https://github.com/chjj/pty.js
