@@ -160,8 +160,7 @@ class TermrkView extends View
     # Private: callback
     terminalMousewheel: (event) =>
         deltaY  = event.wheelDeltaY
-        deltaY /= 120
-        deltaY *= -1
+        deltaY /= -1 * deltaY
 
         @terminal.scrollDisp(deltaY)
 
