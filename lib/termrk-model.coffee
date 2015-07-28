@@ -81,6 +81,7 @@ class TermrkModel
     # Private: starts pty.js child process
     spawnProcess: (options={}) ->
         shell = options.shell ? Config.getDefaultShell()
+        parameters = options.parameters ? Config.getDefaultParameters()
 
         options.name = options.name ? 'xterm-256color'
         options.cwd  = options.cwd ? Config.getStartingDir()
@@ -88,7 +89,7 @@ class TermrkModel
         options.rows = 24
 
         try
-            @process = Task.once require.resolve('./pty-task'), shell, [], options
+            @process = Task.once require.resolve('./pty-task'), shell, parameters, options
         catch error
             error.message += "\nshell: #{shell}"
             throw error
