@@ -116,7 +116,7 @@ class TermrkView extends View
 
     # Private: attach listeners
     attachListeners: ->
-        add = => @subscriptions.add
+        add = (d) => @subscriptions.add d
 
         @input.addEventListener 'keydown', @inputKeydown.bind(@), true
         @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
@@ -139,7 +139,7 @@ class TermrkView extends View
 
         resizeHandler = @updateTerminalSize.bind(@)
         window.addEventListener 'resize', resizeHandler
-        add ->
+        add dispose: ->
             window.removeEventListener 'resize', resizeHandler
 
     ###

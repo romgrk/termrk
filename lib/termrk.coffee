@@ -195,20 +195,20 @@ module.exports = Termrk =
     hide: (callback) ->
         return unless @panel.isVisible()
 
+        @restoreFocus()
+
         @panelView.stop()
         @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
             @panel.hide()
             @activeView.deactivated()
-            @restoreFocus()
             callback?()
 
     show: (callback) ->
+        return if @panel.isVisible()
 
-        if @panel.isVisible()
-            @activeView?.focus()
-            return
 
         @storeFocusedElement()
+        @activeView?.focus()
         @panel.show()
 
         height = @panelView.attr('data-height') ? @panelHeight
