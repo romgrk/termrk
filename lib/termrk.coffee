@@ -65,8 +65,8 @@ module.exports = Termrk =
             'termrk:activate-previous-terminal':   =>
                 @setActiveTerminal(@getPreviousTerminal())
 
-        # @subscriptions.add Config.observe
-        console.log Config.observe
+        # @subscriptions.add Config.observe TODO
+        Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
 
@@ -89,12 +89,8 @@ module.exports = Termrk =
         @panelView = $(atom.views.getView(@panel))
         @panelView.height(@panelHeight + 'px')
         @panelView.addClass 'termrk-panel'
-        @panelView.on 'resize', ->
-            console.log 'panel resize' if window.debug?
 
         @containerView = $(@panelView.find('.termrk-container'))
-        @containerView.on 'resize', ->
-            console.log 'container resize' if window.debug?
 
         @makeResizable '.termrk-panel'
 
@@ -102,15 +98,11 @@ module.exports = Termrk =
         interact(element)
         .resizable
             edges: { left: false, right: false, bottom: false, top: true }
+
         .on 'resizemove', (event) ->
             target = event.target
             target.style.height = event.rect.height + 'px';
 
-            # y = (parseFloat(target.getAttribute('data-y')) || 0)
-            # y += event.deltaRect.top;
-            # target.style.webkitTransform = target.style.transform =
-                # 'translate(0px,' + y + 'px)';
-            # target.setAttribute('data-y', y);
         .on 'resizeend', (event) =>
             event.target.setAttribute 'data-height', event.target.style.height
             @activeView.updateTerminalSize()
@@ -137,6 +129,7 @@ module.exports = Termrk =
     Section: views management
     ###
 
+    # Private: get previous terminal, sorted by creation time
     getPreviousTerminal: ->
         keys  = Object.keys(@views).sort()
 
@@ -150,6 +143,7 @@ module.exports = Termrk =
 
         return @views[key]
 
+    # Private: get next terminal, sorted by creation time
     getNextTerminal: ->
         keys  = Object.keys(@views).sort()
 
@@ -176,6 +170,9 @@ module.exports = Termrk =
         @activeView.animatedShow()
         @activeView.activated()
 
+        unless @panel.isVisible()
+            @show()
+
     removeTerminal: (term) ->
         return unless @views[term.time]?
 
@@ -185,7 +182,7 @@ module.exports = Termrk =
             if term isnt nextTerm
                 @setActiveTerminal(nextTerm)
             else
-                @setActiveTerminal(@createTerminal())
+                @setActiveTerminal(@createTerminal()) # TODO optionnal?
         else
             term.destroy()
 
