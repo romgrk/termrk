@@ -87,8 +87,9 @@ module.exports = Termrk =
             @panelHeight = 300
 
         @panelView = $(atom.views.getView(@panel))
-        @panelView.height(@panelHeight + 'px')
+        @panelView.attr('data-height', @panelHeight)
         @panelView.addClass 'termrk-panel'
+        @panelView.height(0)
 
         @containerView = $(@panelView.find('.termrk-container'))
 
@@ -205,7 +206,6 @@ module.exports = Termrk =
 
     show: (callback) ->
         return if @panel.isVisible()
-
 
         @storeFocusedElement()
         @activeView?.focus()
