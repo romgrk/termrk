@@ -62,8 +62,10 @@ module.exports = Termrk =
                 @removeTerminal(@getActiveTerminal())
             'termrk:activate-next-terminal':   =>
                 @setActiveTerminal(@getNextTerminal())
+                @show()
             'termrk:activate-previous-terminal':   =>
                 @setActiveTerminal(@getPreviousTerminal())
+                @show()
 
         # @subscriptions.add Config.observe TODO
         Config.observe
@@ -165,14 +167,21 @@ module.exports = Termrk =
 
     setActiveTerminal: (term) ->
         return if term is @activeView
-        @activeView?.animatedHide()
-        @activeView?.deactivated()
-        @activeView = term
-        @activeView.animatedShow()
-        @activeView.activated()
 
-        unless @panel.isVisible()
-            @show()
+        if @panel.isVisible()
+            @activeView?.animatedHide()
+            @activeView?.deactivated()
+            @activeView = term
+            @activeView.animatedShow()
+            @activeView.activated()
+        else
+            @activeView?.hide()
+            @activeView?.height(0)
+            @activeView?.deactivated()
+            @activeView = term
+            @activeView.show()
+            @activeView.height('100%')
+            @activeView.activated()
 
     removeTerminal: (term) ->
         return unless @views[term.time]?
@@ -196,6 +205,7 @@ module.exports = Termrk =
     hide: (callback) ->
         return unless @panel.isVisible()
 
+        @activeView?.blur()
         @restoreFocus()
 
         @panelView.stop()
@@ -206,10 +216,10 @@ module.exports = Termrk =
 
     show: (callback) ->
         return if @panel.isVisible()
+        @panel.show()
 
         @storeFocusedElement()
         @activeView?.focus()
-        @panel.show()
 
         height = @panelView.attr('data-height') ? @panelHeight
 

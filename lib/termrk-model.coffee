@@ -137,7 +137,7 @@ class TermrkModel
         @process.pid
 
     destroy: ->
-        @process.kill()
+        @process.kill?()
 
     getView: ->
         @view
