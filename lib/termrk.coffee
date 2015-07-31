@@ -1,5 +1,6 @@
 
 
+path                  = require 'path'
 interact              = require 'interact.js'
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
@@ -13,6 +14,13 @@ Font        = Utils.Font
 Keymap      = Utils.Keymap
 Paths       = Utils.Paths
 
+# TODO place this somewhere else & add more programs
+programsByExtname =
+    '.js':     'node'
+    '.node':   'node'
+    '.py':     'python'
+    '.py3':    'python3'
+    '.coffee': 'coffee'
 
 module.exports = Termrk =
 
@@ -50,12 +58,17 @@ module.exports = Termrk =
             'termrk:blur':              => @blur()
 
             'termrk:insert-selection':  @insertSelection.bind(@)
+            'termrk:run-current-file':  =>
+                @runCurrentFile()
+                @show()
 
             'termrk:create-terminal':   =>
                 @setActiveTerminal(@createTerminal())
+                @show()
             'termrk:create-terminal-current-dir': =>
                 @setActiveTerminal @createTerminal
                     cwd: Paths.current()
+                @show()
 
         @registerCommands '.termrk',
             'termrk:close-terminal':   =>
@@ -244,13 +257,11 @@ module.exports = Termrk =
         else
             editor    = atom.workspace.getActiveTextEditor()
             selection = editor.getSelections()[0]
-            terminal  = @activeView.getModel()
 
             text = selection.getText()
             text = text.replace /(\n)/g, '\\$1'
 
-            terminal.write text
-
+            @activeView.write text
             @activeView.focus()
 
     focus: () ->
@@ -270,6 +281,13 @@ module.exports = Termrk =
             @blur()
         else
             @focus()
+
+    runCurrentFile: () ->
+        file = atom.workspace.getActiveTextEditor().getURI()
+        extname = path.extname file
+        if (program = programsByExtname[extname])?
+            @activeView.write "#{program} #{file}\n"
+        # TODO search for #!
 
     ###
     Section: helpers

@@ -245,6 +245,13 @@ class TermrkView extends View
         return true
 
     ###
+    Section: actions
+    ###
+
+    write: (text) ->
+        @model.write text
+
+    ###
     Section: helpers/utils
     ###
 
