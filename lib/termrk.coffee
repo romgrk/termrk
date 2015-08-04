@@ -71,6 +71,19 @@ module.exports = Termrk =
                 @show()
 
         @registerCommands '.termrk',
+            'termrk:trigger-keypress': =>
+                @activeView.triggerKeypress()
+            'termrk:insert-filename': =>
+                content = atom.workspace.getActiveTextEditor().getURI()
+                @activeView.write(content)
+                @activeView.focus()
+            'core:paste': =>
+                content = atom.clipboard.read()
+                @activeView.write(content)
+                @activeView.focus()
+
+
+        @registerCommands '.termrk',
             'termrk:close-terminal':   =>
                 @removeTerminal(@getActiveTerminal())
             'termrk:activate-next-terminal':   =>

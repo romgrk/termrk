@@ -93,16 +93,7 @@ class TermrkView extends View
         @setupTerminalElement()
 
         @attachListeners()
-
-        @registerCommands '.termrk',
-            'termrk:trigger-keypress': @triggerKeypress.bind(@)
-            'core:paste': =>
-                @model.paste()
-                @focus()
-            'termrk:insert-filename': =>
-                content = atom.workspace.getActiveTextEditor().getURI()
-                @model.write(content)
-
+        
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
         @terminal = new Terminal
