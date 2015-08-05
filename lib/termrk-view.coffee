@@ -8,11 +8,10 @@ pty = require 'pty.js'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
 
-window.termjs = require 'term.js' if window.debug?
+Terminal    = require './termjs/index'
 
 Termrk      = require './termrk'
 TermrkModel = require './termrk-model'
-Terminal    = require './termjs-fix'
 
 Config = require './config'
 Utils  = require './utils'
@@ -57,9 +56,9 @@ class TermrkView extends View
     # Public: {pty.js:Terminal} process of the running shell
     process: null
 
-    # Public: {term.js:Terminal} and jQ wrapper of the element
-    terminal:     null
-    terminalElement: null
+    # Private: {term.js:Terminal} and {HTMLElement}
+    termjs:     null
+    termjsElement: null
 
     isInsertVarMode: false
 
@@ -96,12 +95,12 @@ class TermrkView extends View
 
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
-        @terminal = new Terminal
+        @termjs = new Terminal
             cols: 400
             rows: 24
             screenKeys: false
-        @terminal.open @element
-        @terminalElement = @find('.terminal')
+        @termjs.open @element
+        @termjsElement = @find('.terminal')
 
         @updateFont()
 
@@ -110,23 +109,24 @@ class TermrkView extends View
         add = (d) => @subscriptions.add d
 
         @input.addEventListener 'keydown', @inputKeydown.bind(@), true
-        @input.addEventListener 'keypress', @terminal.keyPress.bind(@terminal)
-        @input.addEventListener 'focus', => @terminal.focus()
-        @input.addEventListener 'blur', => @terminal.blur()
+        @input.addEventListener 'keypress', @termjs.keyPress.bind(@termjs)
+        @input.addEventListener 'focus', => @termjs.focus()
+        @input.addEventListener 'blur', => @termjs.blur()
 
-        @terminal.element.addEventListener 'focus', =>
+        @termjs.element.addEventListener 'focus', =>
             @input.focus()
-        @terminal.element.addEventListener 'mousewheel', @terminalMousewheel.bind(@)
+        @termjs.element.addEventListener 'mousewheel',
+            @terminalMousewheel.bind(@)
 
-        @terminal.on 'data', (data) =>
+        @termjs.on 'data', (data) =>
             @model.write(data)
 
         add @model.onDidStartProcess (shellName) =>
-            @terminal.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
+            @termjs.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
         add @model.onDidExitProcess (code, signal) =>
-            @terminal.write('\x1b[31mProcess terminated.\x1b[m\r\n')
+            @termjs.write('\x1b[31mProcess terminated.\x1b[m\r\n')
         add @model.onDidReceiveData (data) =>
-            @terminal.write data
+            @termjs.write data
 
         resizeHandler = @updateTerminalSize.bind(@)
         window.addEventListener 'resize', resizeHandler
@@ -145,7 +145,7 @@ class TermrkView extends View
             event.stopImmediatePropagation()
             return false
         else
-            allow = @terminal.keyDown.call(@terminal, event)
+            allow = @termjs.keyDown.call(@termjs, event)
             return allow
 
     # Private: callback
@@ -155,7 +155,7 @@ class TermrkView extends View
         # reduce to 1 or -1 and inverse direction
         amount = -1 * (deltaY / Math.abs(deltaY))
 
-        @terminal.scrollDisp(amount)
+        @termjs.scrollDisp(amount)
 
     # Private: insert character from passed event.
     triggerKeypress: (event) =>
@@ -199,7 +199,7 @@ class TermrkView extends View
         width  = parent.width()
         height = parent.height()
 
-        font       = @terminalElement.css('font')
+        font       = @termjsElement.css('font')
         fontWidth  = Font.getWidth("a", font)
         fontHeight = @find('.terminal > div:first-of-type').height()
         # fontHeight = Font.getHeight("a", font)
@@ -210,7 +210,7 @@ class TermrkView extends View
         # FIXME avoid terminal being resized when panel is showing
         return if cols == 100
 
-        @terminal.resize(cols, rows)
+        @termjs.resize(cols, rows)
 
         @model.resize(cols, rows)
 
@@ -218,7 +218,7 @@ class TermrkView extends View
 
     # Public: set font from config
     updateFont: =>
-        @terminalElement.css
+        @termjsElement.css
             'font-size':   Config.get('fontSize')
             'font-family': Config.get('fontFamily')
 
@@ -226,13 +226,15 @@ class TermrkView extends View
     getPanelHeight: ->
         return require('./termrk').getPanelHeight()
 
-    # Public:
+    # Public: focus terminal
     focus: ->
+        @termjs.focus()
         @input.focus()
         return true
 
-    # Public:
+    # Public: blur terminal
     blur: ->
+        @termjs.blur()
         @input.blur()
         return true
 
