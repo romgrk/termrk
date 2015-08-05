@@ -70,6 +70,7 @@ class TermrkModel
     #
     constructor: (options) ->
         TermrkModel.addInstance this
+
         @emitter = new Emitter
 
         @restartShell = options.restartShell ? true
