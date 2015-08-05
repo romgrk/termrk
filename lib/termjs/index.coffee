@@ -1,8 +1,8 @@
 
 
-termjs = require('term.js')
+TermjsTerminal = require './term.js'
 
-class Terminal extends termjs.Terminal
+class Terminal extends TermjsTerminal
 
     @insertStyle: -> return
 
