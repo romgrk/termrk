@@ -6,9 +6,10 @@ TermjsTerminal::fixIpad = ->
     if @isIpad or @isIphone
         @constructor.fixIpad(document)
 
+# TODO merge this with termrk-view
 class Terminal extends TermjsTerminal
 
-    emitter: null
+    # TODO emitter: null
 
     ybase: 0
     ydisp: 0
@@ -17,6 +18,7 @@ class Terminal extends TermjsTerminal
     x:            null
     y:            null
 
+    # blink-on or blink-off (1 or 0)
     cursorState:  null
     cursorHidden: null
 
@@ -28,75 +30,17 @@ class Terminal extends TermjsTerminal
     queue: null
     convertEol: null
 
-    # Added
+    # TODO better detection of focus
     isFocused: false
-
-    # So we can use as handling-function for focusEvent
-    focus: ->
-        @isFocused = true
-
-        if @sendFocus
-            @send('\x1b[I')
-
-        @showCursor()
-        return true
-
-    blur: ->
-        @isFocused = false
-
-        if (@sendFocus)
-            @send('\x1b[O')
-
-        @hideCursor()
-        return true
-
-    blink: ->
-        @cursorState ^= 1
-        @refresh @y, @y
-
-    showCursor: ->
-        @cursorState = 1
-        @refresh @y, @y
-
-        return if @_blink?
-        
-        @_blink = =>
-            unless @isFocused
-                clearInterval @_blink
-            else
-                @blink()
-        setInterval @_blink, 500
-
-    hideCursor: ->
-        clearInterval @_blink if @_blink?
-        @_blink = null
-        @cursorState = 0
-        @refresh @y, @y
-
-
-    # Public: this allows for selection of text inside terminal
-    addTabindexToChildren: ->
-        clickFunction = ->
-            selection = window.getSelection()
-            unless selection? and selection.type is 'Range'
-                @parentElement.focus()
-
-        mouseUpFunction = ->
-            @focus()
-
-        for child in @element.children
-            child.tabIndex    = 0
-            child.onmousedown = -> true
-            child.onmouseup   = mouseUpFunction
-            child.onclick     = clickFunction
 
     # Public: create the terminal-element in the `parent` element
     open: (parent) ->
+        Terminal.isBoldBroken()
+
         self = this
 
         @parent = parent || @parent
-
-        if !@parent
+        unless @parent
             throw new Error('Terminal requires a parent element.')
 
         # Grab global elements.
@@ -133,32 +77,79 @@ class Terminal extends TermjsTerminal
         # Draw the screen.
         @refresh(0, @rows - 1)
 
+        @addTabindexToChildren()
+
         # @constructor.bindKeys()
-
-        @focus()
-
-        @startBlink()
-
-        # Bind to DOM events related
-        # to focus and paste behavior.
-        # on(@element, 'focus', ->
-        #     self.focus()
-        #     if (self.isIpad || self.isIphone) {
-        #         Terminal._textarea.focus()
-        #     }
-        # )
-
         # @bindMouse()
 
-        if (Terminal.brokenBold == null)
-            Terminal.brokenBold = isBoldBroken(@document)
-
-        # @emit('open')
+        @focus()
         setTimeout( ->
             self.element.focus()
         , 100)
 
-        @addTabindexToChildren()
+
+        # Draw the screen.
+        @refresh(0, @rows - 1)
+
+        @emit('open')
+
+    # Public: focus handler
+    focus: ->
+        @isFocused = true
+
+        if @sendFocus
+            @send('\x1b[I')
+
+        @showCursor()
+        return true
+
+    # Public: blur handler
+    blur: ->
+        @isFocused = false
+
+        if (@sendFocus)
+            @send('\x1b[O')
+
+        @hideCursor()
+        return true
+
+    # Private: show cursor and start blink
+    showCursor: ->
+        @cursorState = 1
+        @refresh @y, @y
+        @startBlinkInterval()
+
+    # Private: stop blink and hide cursor
+    hideCursor: ->
+        @clearBlinkInterval()
+        @cursorState = 0
+        @refresh @y, @y
+
+    # Private: start blinking
+    startBlinkInterval: ->
+        @cursorBlink = on
+        if @_blinkInterval?
+            clearInterval @_blinkInterval
+        @_blinkInterval = setInterval @blink.bind(@), 500
+
+    # Private: stop cursor blink interval
+    clearBlinkInterval: ->
+        @cursorBlink = off
+        if @_blinkInterval?
+            clearInterval @_blinkInterval
+            @_blinkInterval = null
+
+    # Private: blink beat
+    blink: ->
+        if @cursorBlink is off
+            @clearBlinkInterval()
+            return
+        # TODO
+        # if @cursorHidden is true
+        #     return
+        # else
+        @cursorState ^= 1
+        @refresh @y, @y
 
     # Public: ...
     resize: (width, height) ->
@@ -174,6 +165,24 @@ class Terminal extends TermjsTerminal
             lastChild.remove()
 
         super(args...)
+
+    # SECTION: HTML elements
+
+    # Private: this allows for selection of text inside terminal
+    addTabindexToChildren: ->
+        clickFunction = ->
+            selection = window.getSelection()
+            unless selection? and selection.type is 'Range'
+                @parentElement.focus()
+
+        mouseUpFunction = ->
+            @focus()
+
+        for child in @element.children
+            child.tabIndex    = 0
+            child.onmousedown = -> true
+            child.onmouseup   = mouseUpFunction
+            child.onclick     = clickFunction
 
     # resize: (width, height) ->
     #     width = 1 if width < 1
