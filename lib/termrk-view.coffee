@@ -150,10 +150,12 @@ class TermrkView extends View
 
     # Private: callback
     terminalMousewheel: (event) =>
-        deltaY  = event.wheelDeltaY
-        deltaY /= -1 * deltaY
+        return if (deltaY = event.wheelDeltaY) is 0
 
-        @terminal.scrollDisp(deltaY)
+        # reduce to 1 or -1 and inverse direction
+        amount = -1 * (deltaY / Math.abs(deltaY))
+
+        @terminal.scrollDisp(amount)
 
     # Private: insert character from passed event.
     triggerKeypress: (event) =>
