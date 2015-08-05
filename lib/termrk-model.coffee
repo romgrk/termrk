@@ -10,8 +10,6 @@ pty = require 'pty.js'
 {Key, KeyKit}         = require 'keykit'
 {Task} = require 'atom'
 
-window.termjs = require 'term.js' if window.debug?
-
 Termrk     = require './termrk'
 TermrkView = require './termrk-view'
 Terminal   = require './termjs-fix'
