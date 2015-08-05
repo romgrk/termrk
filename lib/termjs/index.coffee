@@ -2,32 +2,77 @@
 
 TermjsTerminal = require './term.js'
 
+TermjsTerminal::fixIpad = ->
+    if @isIpad or @isIphone
+        @constructor.fixIpad(document)
+
 class Terminal extends TermjsTerminal
 
-    @insertStyle: -> return
+    emitter: null
 
-    @bindKeys: ->
-        return if @_mouseListener?
-        @_mouseListener = (ev) ->
-            unless Terminal.focus and ev.target?
-                return
+    ybase: 0
+    ydisp: 0
 
-            el = ev.target
-            while el
-                if (el is Terminal.focus.element)
-                    return
-                el = el.parentNode
-            Terminal.focus.blur()
-        document.addEventListener 'mousedown', @_mouseListener
+    # Cursor screen position
+    x:            null
+    y:            null
+
+    cursorState:  null
+    cursorHidden: null
+
+    # unknown
+    scrollTop:    null
+    scrollBottom: null
+
+    state: null
+    queue: null
+    convertEol: null
+
+    # Added
+    isFocused: false
 
     # So we can use as handling-function for focusEvent
     focus: ->
-        super()
+        @isFocused = true
+
+        if @sendFocus
+            @send('\x1b[I')
+
+        @showCursor()
         return true
 
     blur: ->
-        super()
+        @isFocused = false
+
+        if (@sendFocus)
+            @send('\x1b[O')
+
+        @hideCursor()
         return true
+
+    blink: ->
+        @cursorState ^= 1
+        @refresh @y, @y
+
+    showCursor: ->
+        @cursorState = 1
+        @refresh @y, @y
+
+        return if @_blink?
+        
+        @_blink = =>
+            unless @isFocused
+                clearInterval @_blink
+            else
+                @blink()
+        setInterval @_blink, 500
+
+    hideCursor: ->
+        clearInterval @_blink if @_blink?
+        @_blink = null
+        @cursorState = 0
+        @refresh @y, @y
+
 
     # Public: this allows for selection of text inside terminal
     addTabindexToChildren: ->
