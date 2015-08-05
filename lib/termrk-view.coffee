@@ -59,7 +59,7 @@ class TermrkView extends View
 
     # Public: {term.js:Terminal} and jQ wrapper of the element
     terminal:     null
-    terminalView: null
+    terminalElement: null
 
     isInsertVarMode: false
 
@@ -93,7 +93,7 @@ class TermrkView extends View
         @setupTerminalElement()
 
         @attachListeners()
-        
+
     # Private: initialize the {Terminal} (term.js)
     setupTerminalElement: ->
         @terminal = new Terminal
@@ -101,7 +101,7 @@ class TermrkView extends View
             rows: 24
             screenKeys: false
         @terminal.open @element
-        @terminalView = @find('.terminal')
+        @terminalElement = @find('.terminal')
 
         @updateFont()
 
@@ -197,7 +197,7 @@ class TermrkView extends View
         width  = parent.width()
         height = parent.height()
 
-        font       = @terminalView.css('font')
+        font       = @terminalElement.css('font')
         fontWidth  = Font.getWidth("a", font)
         fontHeight = @find('.terminal > div:first-of-type').height()
         # fontHeight = Font.getHeight("a", font)
@@ -216,7 +216,7 @@ class TermrkView extends View
 
     # Public: set font from config
     updateFont: =>
-        @terminalView.css
+        @terminalElement.css
             'font-size':   Config.get('fontSize')
             'font-family': Config.get('fontFamily')
 
