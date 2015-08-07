@@ -1,7 +1,5 @@
 
 _   = require 'underscore-plus'
-Q   = require 'q'
-$   = require 'jquery.transit'
 pty = require 'pty.js'
 
 {Emitter}             = require 'atom'
@@ -12,7 +10,6 @@ pty = require 'pty.js'
 
 Termrk     = require './termrk'
 TermrkView = require './termrk-view'
-Terminal   = require './termjs-fix'
 
 Config = require './config'
 Utils  = require './utils'
@@ -52,7 +49,7 @@ class TermrkModel
     Section: instance
     ###
 
-    process: null
+    pty: null
     emitter: null
 
     # options
@@ -87,16 +84,16 @@ class TermrkModel
         options.rows = 24
 
         try
-            @process = Task.once require.resolve('./pty-task'), shell, [], options
+            @pty = Task.once require.resolve('./pty-task'), shell, [], options
         catch error
             error.message += "\nshell: #{shell}"
             throw error
 
-        @process.on 'data', (data) =>
+        @pty.on 'data', (data) =>
             @emitter.emit 'data', data
 
-        @process.on 'exit', (code, signal) =>
-            delete @process
+        @pty.on 'exit', (code, signal) =>
+            delete @pty
             @emitter.emit 'exit', {code, signal}
             @spawnProcess() if @restartShell
 
@@ -110,33 +107,33 @@ class TermrkModel
     # Public: writes data to the process
     write: (data) ->
         # console.log JSON.stringify data
-        @process.send(event: 'input', text: data)
+        @pty.send(event: 'input', text: data)
 
     # Public: resize the process buffer
     resize: (cols, rows) ->
         if typeof cols is 'object'
-            @process.send(event: 'resize', cols.cols, rows.rows)
+            @pty.send(event: 'resize', cols.cols, rows.rows)
         else if _.isArray(cols)
-            @process.send(event: 'resize', cols[1], rows[1])
+            @pty.send(event: 'resize', cols[1], rows[1])
         else
-            @process.send(event: 'resize', cols, rows)
+            @pty.send(event: 'resize', cols, rows)
 
     # Public: writes text from clipboard to terminal
     paste: ->
-        @process.send(event: 'input', text: atom.clipboard.read())
+        @pty.send(event: 'input', text: atom.clipboard.read())
 
     ###
     Section: get/set/utils
     ###
 
     getProcess: ->
-        @process
+        @pty
 
     getPID: ->
-        @process.pid
+        @pty.pid
 
     destroy: ->
-        @process.kill?()
+        @pty.kill?()
 
     getView: ->
         @view
