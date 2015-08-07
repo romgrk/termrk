@@ -8,7 +8,7 @@ pty = require 'pty.js'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
 
-Terminal    = require './termjs/index'
+Terminal    = require 'term.js'
 
 Termrk      = require './termrk'
 TermrkModel = require './termrk-model'
@@ -148,12 +148,28 @@ class TermrkView extends View
             allow = @termjs.keyDown.call(@termjs, event)
             return allow
 
-    # Private: callback
+    # Private: mouseWheel event callback
     terminalMousewheel: (event) =>
-        return if (deltaY = event.wheelDeltaY) is 0
+        deltaY = event.wheelDeltaY
 
-        # reduce to 1 or -1 and inverse direction
-        amount = -1 * (deltaY / Math.abs(deltaY))
+        # OS X
+        if process.platform is 'darwin'
+
+            # ZachR0: change this as you like
+
+            if event.type is 'DOMMouseScroll'
+                deltaY += if event.detail < 0 then -1 else 1
+            else
+                deltaY += if event.wheelDeltaY > 0 then -1 else 1
+            deltaY *= -1
+
+            amount = deltaY
+
+        # Linux/Win32
+        else
+            return if deltaY is 0 or deltaY is NaN
+            # reduce to 1 or -1 and inverse direction
+            amount = -1 * (deltaY / Math.abs(deltaY))
 
         @termjs.scrollDisp(amount)
 
