@@ -85,12 +85,12 @@ class TermrkView extends View
 
         @model.setView this
 
-        @emitter = new Emitter
+        @emitter       = new Emitter
         @subscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
-        @setupTerminalElement()
 
+        @setupTerminalElement()
         @attachListeners()
 
     # Private: initialize the {Terminal} (term.js)
@@ -193,11 +193,12 @@ class TermrkView extends View
         @animate {height: '0'}, 250, ->
             cb?()
 
-    # Public: update the terminal cols/rows based on the panel size
+    # Public: update the terminal cols/rows based on the element size
     updateTerminalSize: =>
         parent = @getParent()
-        width  = parent.width()
-        height = parent.height()
+        width  = @termjsElement.width()
+        height = @termjsElement.height()
+        return if width == 0 or height == 0
 
         font       = @termjsElement.css('font')
         fontWidth  = Font.getWidth("a", font)
@@ -206,6 +207,7 @@ class TermrkView extends View
 
         cols = Math.floor(width / fontWidth)
         rows = Math.floor(height / fontHeight)
+        return if cols < 15 or rows < 5
 
         # FIXME avoid terminal being resized when panel is showing
         return if cols == 100
