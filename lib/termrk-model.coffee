@@ -111,16 +111,11 @@ class TermrkModel
 
     # Public: resize the process buffer
     resize: (cols, rows) ->
-        if typeof cols is 'object'
-            @pty.send(event: 'resize', cols.cols, rows.rows)
-        else if _.isArray(cols)
-            @pty.send(event: 'resize', cols[1], rows[1])
-        else
-            @pty.send(event: 'resize', cols, rows)
+        @pty.send(event: 'resize', cols: cols, rows: rows)
 
     # Public: writes text from clipboard to terminal
     paste: ->
-        @pty.send(event: 'input', text: atom.clipboard.read())
+        @write(atom.clipboard.read())
 
     ###
     Section: get/set/utils
