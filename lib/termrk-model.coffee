@@ -64,9 +64,11 @@ class TermrkModel
         @options.cwd   ?= Config.getStartingDir()
         @options.cols  ?= 200 # avoids init messages being cropped FIXME
         @options.rows  ?= 24
+        @options.parameters ?= Config.getDefaultParameters()
 
         try
-            @pty = Task.once require.resolve('./pty-task'), shell, parameters, options
+            @pty = Task.once require.resolve('./pty-task'),
+                @options.shell, @options.parameters, @options
         catch error
             error.message += "\n#{JSON.stringify @options}"
             throw error
