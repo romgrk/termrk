@@ -10,23 +10,6 @@ OS   = require 'os'
 
 {$, $$, View} = require 'space-pen'
 
-class Config
-    prefix: null
-    constructor: (prefix) ->
-        @prefix = prefix + '.'
-
-    get: (k) ->
-        return atom.config.get (@prefix + k)
-
-    set: (k, v) ->
-        return atom.config.set (@prefix + k), v
-
-    observe: (key, callback) ->
-        if typeof key is 'object'
-            atom.config.onDidChange(@prefix+k, fn) for k, fn of key
-        else
-            atom.config.onDidChange(@prefix+key, callback)
-
 Font =
     # Public: get the width of the text with specified font
     getWidth: (text, font) ->
@@ -130,4 +113,4 @@ Paths =
     current: ->
         Path.dirname atom.workspace.getActiveTextEditor().getURI()
 
-module.exports = {Font, Config, Keymap, Paths}
+module.exports = {Font, Keymap, Paths}
