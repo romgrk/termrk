@@ -66,8 +66,7 @@ class TermrkModel
         @options.rows  ?= 24
 
         try
-            @pty = Task.once require.resolve('./pty-task'),
-                @options.shell, [], @options
+            @pty = Task.once require.resolve('./pty-task'), shell, parameters, options
         catch error
             error.message += "\n#{JSON.stringify @options}"
             throw error

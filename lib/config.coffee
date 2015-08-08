@@ -42,6 +42,12 @@ class TermrkConfig
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
+            
+        'shellParameters':
+            title: 'Shell Parameters'
+            description: 'The parameters to pass through when creating the shell'
+            type: 'string'
+            default: 'none'
 
     constructor: (packageName) ->
         @prefix = packageName + '.'
@@ -94,6 +100,11 @@ class TermrkConfig
             when 'project' then Paths.project()
             when 'cwd' then atom.workspace.getActiveTextEditor().getURI()
             else process.cwd()
+                
+    getDefaultParameters: ->
+        parameters = @get('shellParameters')
+        args = parameters.split(/\s+/g).filter (arg)-> arg
+        args
 
 # TODO fix local name
 if atom.packages.getLoadedPackage('termrk')?
