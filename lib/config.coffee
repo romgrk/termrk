@@ -25,6 +25,16 @@ class TermrkConfig
             type:        'string'
             default:     'project'
             enum:        ['home', 'project', 'cwd']
+        'shellParameters':
+            title: 'Shell Parameters'
+            description: 'The parameters to pass through when creating the shell'
+            type: 'string'
+            default: ''
+        'restartShell':
+            title: 'Auto-restart'
+            description: 'Restarts the shell as soon as it is terminated.'
+            type: 'boolean'
+            default: 'true'
 
         # Rendering options
         'defaultHeight':
@@ -42,12 +52,6 @@ class TermrkConfig
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
-
-        'shellParameters':
-            title: 'Shell Parameters'
-            description: 'The parameters to pass through when creating the shell'
-            type: 'string'
-            default: ''
 
     constructor: (packageName) ->
         @prefix = packageName + '.'
