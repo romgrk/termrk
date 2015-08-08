@@ -50,9 +50,11 @@ class TermrkModel
     #
     constructor: (@options={}) ->
         @emitter = new Emitter
+        @spawnProcess()
 
     # Public: starts pty.js child process
     spawnProcess: (shell, options) ->
+        return if @pty?
         @options       ?= {}
         @options.shell = shell if shell?
         _.extend @options, options
@@ -103,8 +105,11 @@ class TermrkModel
     getPID: ->
         @pty.pid
 
+    kill: ->
+        @pty?.kill()
+
     destroy: ->
-        @pty.kill?()
+        @pty?.destroy()
 
     getView: ->
         @view
