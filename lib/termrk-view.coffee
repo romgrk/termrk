@@ -1,5 +1,4 @@
 
-Q   = require 'q'
 $   = require 'jquery.transit'
 pty = require 'pty.js'
 
@@ -32,6 +31,7 @@ class TermrkView extends View
     @instances: new Set()
 
     @addInstance: (termrkView) ->
+        termrkView.time = String(Date.now())
         @instances.add(termrkView)
 
     @removeInstance: (termrkView) ->
@@ -56,9 +56,8 @@ class TermrkView extends View
     # Public: {pty.js:Terminal} process of the running shell
     process: null
 
-    # Private: {term.js:Terminal} and {HTMLElement}
+    # Private: {term.js:Terminal}
     termjs:     null
-    termjsElement: null
 
     isInsertVarMode: false
 
@@ -66,7 +65,7 @@ class TermrkView extends View
         @div class: 'termrk', =>
             @span class: 'pid-label', outlet: 'pidLabel'
             @input class: 'input-keylistener'
-            # @div class: 'terminal' # <= created by term.js
+            @div class: 'terminal' # <= created by term.js
 
     ###
     Section: Events
@@ -79,30 +78,30 @@ class TermrkView extends View
     Section: init/setup
     ###
 
-    initialize: (@model) ->
+    initialize: (@options) ->
         TermrkView.addInstance this
-        @time  = String(Date.now())
-
-        @model.setView this
 
         @emitter       = new Emitter
         @subscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
 
-        @setupTerminalElement()
-        @attachListeners()
-
-    # Private: initialize the {Terminal} (term.js)
-    setupTerminalElement: ->
-        @termjs = new Terminal
-            cols: 400
-            rows: 24
-            screenKeys: false
-        @termjs.open @element
-        @termjsElement = @find('.terminal')
-
         @updateFont()
+
+    start: (options) ->
+        @options = options ? @options
+
+        @element.removeChild @find('.terminal')[0]
+
+        @termjs = new Terminal
+            cols: @options.cols
+            rows: @options.rows
+        @termjs.open @element
+
+        @model = new TermrkModel @options
+        @model.spawnProcess(@options)
+
+        @attachListeners()
 
     # Private: attach listeners
     attachListeners: ->
@@ -118,8 +117,7 @@ class TermrkView extends View
         @termjs.element.addEventListener 'mousewheel',
             @terminalMousewheel.bind(@)
 
-        @termjs.on 'data', (data) =>
-            @model.write(data)
+        @termjs.on 'data', (data) => @model.write(data)
 
         add @model.onDidStartProcess (shellName) =>
             @termjs.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
@@ -211,34 +209,46 @@ class TermrkView extends View
 
     # Public: update the terminal cols/rows based on the element size
     updateTerminalSize: =>
-        parent = @getParent()
-        width  = @termjsElement.width()
-        height = @termjsElement.height()
-        return if width == 0 or height == 0
+        width  = @width()
+        height = @height()
 
-        font       = @termjsElement.css('font')
-        fontWidth  = Font.getWidth("a", font)
-        fontHeight = @find('.terminal > div:first-of-type').height()
-        # fontHeight = Font.getHeight("a", font)
+        [cols, rows] = @calculateTerminalDimensions(width, height)
 
-        cols = Math.floor(width / fontWidth)
-        rows = Math.floor(height / fontHeight)
+        console.log 'update', cols, rows
         return if cols < 15 or rows < 5
-
         # FIXME avoid terminal being resized when panel is showing
         return if cols == 100
 
-        @termjs.resize(cols, rows)
-
-        @model.resize(cols, rows)
+        @termjs.resize cols, rows
+        @model.resize  cols, rows
 
         @emitter.emit 'resize', {cols, rows}
 
     # Public: set font from config
     updateFont: =>
-        @termjsElement.css
+        @find('.terminal').css
             'font-size':   Config.get('fontSize')
             'font-family': Config.get('fontFamily')
+
+        @css 'font', @find('.terminal > div:first-of-type').css('font')
+
+        @updateTerminalSize()
+
+    # Public: returns [cols, rows] for the given width and height
+    calculateTerminalDimensions: (width, height) ->
+        [fontWidth, fontHeight] = @getCharDimensions()
+
+        cols = Math.floor(width / fontWidth)
+        rows = Math.floor(height / fontHeight)
+
+        return [cols, rows]
+
+    # Public: get terminal element font
+    getCharDimensions: ->
+        font   = @find('.terminal').css 'font'
+        width  = Font.getWidth("a", font)
+        height  = Font.getHeight("a", font)
+        return [width, height]
 
     # Public: get the actual untoggled height
     getPanelHeight: ->
@@ -246,13 +256,13 @@ class TermrkView extends View
 
     # Public: focus terminal
     focus: ->
-        @termjs.focus()
+        # @termjs.focus()
         @input.focus()
         return true
 
     # Public: blur terminal
     blur: ->
-        @termjs.blur()
+        # @termjs.blur()
         @input.blur()
         return true
 
