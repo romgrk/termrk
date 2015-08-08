@@ -1,11 +1,15 @@
 
+{CompositeDisposable} = require 'atom'
+
 Utils  = require './utils'
-Config = Utils.Config
 Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
-class TermrkConfig extends Config
+class TermrkConfig
+
+    prefix: null
+
     schema:
         # Shell options
         'shellCommand':
@@ -39,6 +43,34 @@ class TermrkConfig extends Config
             type:        'string'
             default:     'Monospace'
 
+    constructor: (packageName) ->
+        @prefix = packageName + '.'
+
+        for key, desciption in @schema
+            Object.defineProperty this, key,
+                get: => @get key
+                set: (v) => @set key, v
+
+    get: (k) ->
+        return atom.config.get (@prefix + k)
+
+    set: (k, v) ->
+        return atom.config.set (@prefix + k), v
+
+    # Public: observe the given key(s)
+    #
+    # (key, callback)
+    # ({key: callback, ...})
+    #
+    # Returns [Composite]Disposable
+    observe: (key, callback) ->
+        if typeof key is 'object'
+            disposable = new CompositeDisposable
+            for k, fn of key
+                disposable.add atom.config.onDidChange(@prefix+k, fn)
+        else
+            atom.config.onDidChange(@prefix+key, callback)
+
     # Public: get default system shell
     getDefaultShell: ->
         shell = @get 'shellCommand'
@@ -60,7 +92,7 @@ class TermrkConfig extends Config
             when 'cwd' then atom.workspace.getActiveTextEditor().getURI()
             else process.cwd()
 
-# Test package name, apm is case-sensitive sometimes >> TODO create issue on APM
+# TODO fix local name
 if atom.packages.getLoadedPackage('termrk')?
     name = 'termrk'
 else
