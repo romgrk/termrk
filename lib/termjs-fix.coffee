@@ -1,58 +1,96 @@
 
-TermjsTerminal = require 'term.js'
+termjs = require 'term.js'
 
 # TODO rethink object structure
 # this could be merged with the model,
 # and there would be a Terminal HTMLElement
 
-class Terminal extends TermjsTerminal
+class Terminal extends termjs.Terminal
 
-    # TODO emitter: null
+    @bindKeys: ->
+        return if @_mouseListener?
+        @_mouseListener = (ev) ->
+            unless Terminal.focus and ev.target?
+                return
 
-    ybase: 0
-    ydisp: 0
+            el = ev.target
+            while el
+                if (el is Terminal.focus.element)
+                    return
+                el = el.parentNode
+            Terminal.focus.blur()
+        document.addEventListener 'mousedown', @_mouseListener
 
-    # Cursor screen position
-    x:            null
-    y:            null
-
-    # blink-on or blink-off (1 or 0)
-    cursorState:  null
-    cursorHidden: null
-
-    # unknown
-    scrollTop:    null
-    scrollBottom: null
-
-    state: null
-    queue: null
-    convertEol: null
-
-    # TODO better detection of focus
-    isFocused: false
-
-    # Public: create the terminal-element
+    # Public: create the terminal-element in the `parent` element
     open: (parent) ->
-        super(parent)
-        @emit('open')
+        termjs.Terminal.brokenBold = false
+
+        self = this
+
+        @parent = parent || @parent
+
+        if !@parent
+            throw new Error('Terminal requires a parent element.')
+
+        # Grab global elements.
+        @context  = window
+        @document = document
+        @body     = document.getElementsByTagName('body')[0]
+
+        # Parse user-agent strings.
+        if (@context.navigator && @context.navigator.userAgent)
+            @isMac = !!~@context.navigator.userAgent.indexOf('Mac')
+            @isIpad = !!~@context.navigator.userAgent.indexOf('iPad')
+            @isIphone = !!~@context.navigator.userAgent.indexOf('iPhone')
+            @isMSIE = !!~@context.navigator.userAgent.indexOf('MSIE')
+
+        # Create our main terminal element.
+        @element = @document.createElement('div')
+        @element.className = 'terminal'
+        @element.style.outline = 'none'
+        @element.setAttribute('tabindex', 0)
+
+        # This allows user to set terminal style in CSS
+        @colors[256] = @element.style.backgroundColor
+        @colors[257] = @element.style.color
+
+        # Create the lines for our terminal.
+        @children = []
+        for i in [0..@rows]
+            div = @document.createElement('div')
+            @element.appendChild(div)
+            @children.push(div)
+
+        @parent.appendChild(@element)
+
+        # Draw the screen.
+        @refresh(0, @rows - 1)
+
+        # @constructor.bindKeys()
+        @focus()
+
+        setTimeout( ->
+            self.element.focus()
+        , 100)
+
+    # Public: ...
+    resize: (width, height) ->
+        super(width, height)
+        @addTabindexToChildren()
 
     # Public: focus handler
     focus: ->
-        @isFocused = true
-
-        if @sendFocus
+        if @sendFocus and not @isFocused
             @send('\x1b[I')
-
+        @isFocused = true
         @showCursor()
         return true
 
     # Public: blur handler
     blur: ->
-        @isFocused = false
-
-        if (@sendFocus)
+        if @sendFocus and @isFocused
             @send('\x1b[O')
-
+        @isFocused = false
         @hideCursor()
         return true
 
@@ -94,11 +132,7 @@ class Terminal extends TermjsTerminal
         @cursorState ^= 1
         @refresh @y, @y
 
-    resize: (cols, rows) ->
-        super(cols, rows)
-        @addTabindexToChildren()
-
-    # Private: this allows for selection of text inside terminal
+    # Public: this allows for selection of text inside terminal
     addTabindexToChildren: ->
         clickFunction = ->
             selection = window.getSelection()
