@@ -215,7 +215,6 @@ class TermrkView extends View
 
         [cols, rows] = @calculateTerminalDimensions(width, height)
 
-        console.log 'update', cols, rows
         return if cols < 15 or rows < 5
         # FIXME avoid terminal being resized when panel is showing
         return if cols == 100
