@@ -94,6 +94,10 @@ class Terminal extends TermjsTerminal
         @cursorState ^= 1
         @refresh @y, @y
 
+    resize: (cols, rows) ->
+        super(cols, rows)
+        @addTabindexToChildren()
+
     # Private: this allows for selection of text inside terminal
     addTabindexToChildren: ->
         clickFunction = ->
