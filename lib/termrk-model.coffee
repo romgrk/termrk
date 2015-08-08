@@ -42,24 +42,22 @@ class TermrkModel
     #
     # * `options`
     #   * `.shell` - {String} shell name eg. 'bash'
-    #   * `.restartShell` - {Boolean} auto-restart shell on exit
     #   * `.name` - {String} term.js: name of terminal
-    #   * `.cwd` - {String} cwd of shell
+    #   * `.cwd` - {String} path in which shell is to be started
     #   * `.cols` - {Int} terminal columns
     #   * `.rows` - {Int} terminal rows
     #
     constructor: (@options={}) ->
         @emitter = new Emitter
-        @spawnProcess()
+        @spawnProcess() # FIXME or make private
 
     # Public: starts pty.js child process
     spawnProcess: (shell, options) ->
         return if @pty?
-        @options       ?= {}
+        @options ?= {}
         @options.shell = shell if shell?
         _.extend @options, options
 
-        @options.name  ?= 'xterm-256color'
         @options.shell ?= Config.getDefaultShell()
         @options.cwd   ?= Config.getStartingDir()
         @options.cols  ?= 200 # avoids init messages being cropped FIXME
@@ -79,9 +77,9 @@ class TermrkModel
         @pty.on 'exit', (code, signal) =>
             delete @pty
             @emitter.emit 'exit', {code, signal}
-            @spawnProcess() if @options.restartShell
+            @spawnProcess() if Config.restartShell
 
-        @emitter.emit 'start', shell
+        @emitter.emit 'start', @options.shell
 
     ###
     Section: commands
@@ -90,11 +88,11 @@ class TermrkModel
     # Public: writes data to the process
     write: (data) ->
         # console.log JSON.stringify data
-        @pty.send(event: 'input', text: data)
+        @pty?.send(event: 'input', text: data)
 
     # Public: resize the process buffer
     resize: (cols, rows) ->
-        @pty.send(event: 'resize', cols: cols, rows: rows)
+        @pty?.send(event: 'resize', cols: cols, rows: rows)
 
     ###
     Section: get/set/utils
