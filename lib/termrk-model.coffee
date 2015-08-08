@@ -2,11 +2,7 @@
 _   = require 'underscore-plus'
 pty = require 'pty.js'
 
-{Emitter}             = require 'atom'
-{CompositeDisposable} = require 'atom'
-{$$, View}            = require 'space-pen'
-{Key, KeyKit}         = require 'keykit'
-{Task} = require 'atom'
+{Task, Emitter} = require 'atom'
 
 Termrk     = require './termrk'
 TermrkView = require './termrk-view'
@@ -72,15 +68,13 @@ class TermrkModel
 
         @spawnProcess(options)
 
-    attachListeners: ->
-
     # Private: starts pty.js child process
     spawnProcess: (options={}) ->
         shell = options.shell ? Config.getDefaultShell()
 
         options.name = options.name ? 'xterm-256color'
         options.cwd  = options.cwd ? Config.getStartingDir()
-        options.cols = 400
+        options.cols = 400 # avoids init messages being cropped FIXME
         options.rows = 24
 
         try
@@ -98,7 +92,6 @@ class TermrkModel
             @spawnProcess() if @restartShell
 
         @emitter.emit 'start', shell
-        return
 
     ###
     Section: commands
