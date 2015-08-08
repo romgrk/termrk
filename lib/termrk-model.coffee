@@ -17,18 +17,6 @@ module.exports =
 class TermrkModel
 
     ###
-    Section: static
-    ###
-
-    @instances: new Set()
-
-    @addInstance: (model) ->
-        @instances.add(model)
-
-    @removeInstance: (model) ->
-        @instances.remove(model)
-
-    ###
     Section: Events
     ###
 
@@ -45,11 +33,10 @@ class TermrkModel
     Section: instance
     ###
 
-    pty: null
+    pty:     null
     emitter: null
 
-    # options
-    restartShell: true
+    options: null
 
     # Public: constructor
     #
@@ -58,29 +45,29 @@ class TermrkModel
     #   * `.restartShell` - {Boolean} auto-restart shell on exit
     #   * `.name` - {String} term.js: name of terminal
     #   * `.cwd` - {String} cwd of shell
+    #   * `.cols` - {Int} terminal columns
+    #   * `.rows` - {Int} terminal rows
     #
-    constructor: (options) ->
-        TermrkModel.addInstance this
-
+    constructor: (@options={}) ->
         @emitter = new Emitter
 
-        @restartShell = options.restartShell ? true
+    # Public: starts pty.js child process
+    spawnProcess: (shell, options) ->
+        @options       ?= {}
+        @options.shell = shell if shell?
+        _.extend @options, options
 
-        @spawnProcess(options)
-
-    # Private: starts pty.js child process
-    spawnProcess: (options={}) ->
-        shell = options.shell ? Config.getDefaultShell()
-
-        options.name = options.name ? 'xterm-256color'
-        options.cwd  = options.cwd ? Config.getStartingDir()
-        options.cols = 400 # avoids init messages being cropped FIXME
-        options.rows = 24
+        @options.name  ?= 'xterm-256color'
+        @options.shell ?= Config.getDefaultShell()
+        @options.cwd   ?= Config.getStartingDir()
+        @options.cols  ?= 200 # avoids init messages being cropped FIXME
+        @options.rows  ?= 24
 
         try
-            @pty = Task.once require.resolve('./pty-task'), shell, [], options
+            @pty = Task.once require.resolve('./pty-task'),
+                @options.shell, [], @options
         catch error
-            error.message += "\nshell: #{shell}"
+            error.message += "\n#{JSON.stringify @options}"
             throw error
 
         @pty.on 'data', (data) =>
@@ -89,7 +76,7 @@ class TermrkModel
         @pty.on 'exit', (code, signal) =>
             delete @pty
             @emitter.emit 'exit', {code, signal}
-            @spawnProcess() if @restartShell
+            @spawnProcess() if @options.restartShell
 
         @emitter.emit 'start', shell
 
@@ -105,10 +92,6 @@ class TermrkModel
     # Public: resize the process buffer
     resize: (cols, rows) ->
         @pty.send(event: 'resize', cols: cols, rows: rows)
-
-    # Public: writes text from clipboard to terminal
-    paste: ->
-        @write(atom.clipboard.read())
 
     ###
     Section: get/set/utils
