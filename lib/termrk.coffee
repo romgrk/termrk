@@ -44,6 +44,8 @@ module.exports = Termrk =
     config: Config.schema
 
     activate: (state) ->
+        @$ = $
+
         @subscriptions = new CompositeDisposable()
 
         @setupElements()
@@ -57,17 +59,18 @@ module.exports = Termrk =
             'termrk:focus':             => @focus()
             'termrk:blur':              => @blur()
 
-            'termrk:insert-selection':  @insertSelection.bind(@)
+            'termrk:insert-selection':  =>
+                @insertSelection.bind(@)
+                @show()
             'termrk:run-current-file':  =>
                 @runCurrentFile()
                 @show()
 
             'termrk:create-terminal':   =>
-                @setActiveTerminal(@createTerminal())
+                @setActiveTerminal @createTerminal()
                 @show()
             'termrk:create-terminal-current-dir': =>
-                @setActiveTerminal @createTerminal
-                    cwd: Paths.current()
+                @setActiveTerminal @createTerminal(cwd: Paths.current())
                 @show()
 
         @registerCommands '.termrk',
@@ -100,8 +103,7 @@ module.exports = Termrk =
 
         @setActiveTerminal(@createTerminal())
 
-        @$ = $
-        window.termrk = @
+        window.termrk = @ if window.debug == true
 
     setupElements: ->
         @container = @createContainer()
@@ -208,6 +210,9 @@ module.exports = Termrk =
             @activeView.show()
             @activeView.height('100%')
             @activeView.activated()
+
+        window.term = @activeView if window.debug == true
+        window.termjs = @activeView.termjs if window.debug == true
 
     removeTerminal: (term) ->
         return unless @views[term.time]?
