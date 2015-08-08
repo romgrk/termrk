@@ -1,4 +1,5 @@
 
+_   = require 'underscore-plus'
 $   = require 'jquery.transit'
 pty = require 'pty.js'
 
@@ -7,9 +8,9 @@ pty = require 'pty.js'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
 
-Terminal    = require 'term.js'
-
 Termrk      = require './termrk'
+
+Terminal    = require './termjs-fix'
 TermrkModel = require './termrk-model'
 
 Config = require './config'
@@ -79,6 +80,7 @@ class TermrkView extends View
     Section: init/setup
     ###
 
+    # TODO use HTMLElement, to get an 'attached' event
     initialize: (@options) ->
         TermrkView.addInstance this
 
@@ -89,20 +91,27 @@ class TermrkView extends View
 
         @updateFont()
 
+    # TODO document options
     start: (options) ->
-        @options = options ? @options
+        @options ?= {}
+        _.extend @options, options
+
+        @options.name  ?= 'xterm-256color'
 
         @element.removeChild @find('.terminal')[0]
 
-        @termjs = new Terminal
-            cols: @options.cols
+        @termjs = new Terminal  # Do not feed it with a reference.
+            cols: @options.cols # It EATS the object. Make a deep copy.
             rows: @options.rows
+            name: @options.name
         @termjs.open @element
 
         @model = new TermrkModel @options
         @model.spawnProcess(@options)
 
         @attachListeners()
+
+        @updateFont()
 
     # Private: attach listeners
     attachListeners: ->
@@ -121,9 +130,10 @@ class TermrkView extends View
         @termjs.on 'data', (data) => @model.write(data)
 
         add @model.onDidStartProcess (shellName) =>
-            @termjs.write("\x1b[31mProcess started: #{shellName}\x1b[m\r\n")
+            @termjs.write("\x1b[31mProcess started: #{@options.shell}\x1b[m\r\n")
         add @model.onDidExitProcess (code, signal) =>
             @termjs.write('\x1b[31mProcess terminated.\x1b[m\r\n')
+            @processExit(code, signal)
         add @model.onDidReceiveData (data) =>
             @termjs.write data
 
@@ -179,6 +189,10 @@ class TermrkView extends View
             keypressEvent = KeyKit.createKBEvent 'keypress', keystroke
             @input.dispatchEvent keypressEvent
 
+    # Private: pty exit callback
+    processExit: (code, signal) ->
+        # TODO
+
     # Public: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
@@ -230,7 +244,9 @@ class TermrkView extends View
             'font-size':   Config.get('fontSize')
             'font-family': Config.get('fontFamily')
 
-        @css 'font', @find('.terminal > div:first-of-type').css('font')
+        computedFont = @find('.terminal').css('font')
+        @css 'font', computedFont
+        console.log computedFont
 
         @updateTerminalSize()
 
