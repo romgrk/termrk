@@ -28,10 +28,9 @@ module.exports = Termrk =
     container:     null
     containerView: null
 
-    # Public: panel model, jQ wrapper and default height
+    # Public: panel model, jQ wrapper
     panel:       null
     panelView:   null
-    panelHeight: null
 
     # Public: {CompositeDisposable}
     subscriptions: null
@@ -45,10 +44,9 @@ module.exports = Termrk =
 
     activate: (state) ->
         @$ = $
+        @config = Config
 
         @subscriptions = new CompositeDisposable()
-
-        @setupElements()
 
         @registerCommands 'atom-workspace',
             'termrk:toggle':            => @toggle()
@@ -85,7 +83,6 @@ module.exports = Termrk =
                 @activeView.write(content)
                 @activeView.focus()
 
-
         @registerCommands '.termrk',
             'termrk:close-terminal':   =>
                 @removeTerminal(@getActiveTerminal())
@@ -96,32 +93,26 @@ module.exports = Termrk =
                 @setActiveTerminal(@getPreviousTerminal())
                 @show()
 
-        # @subscriptions.add Config.observe TODO
-        Config.observe
+        @subscriptions.add Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
 
+        @setupElements()
         @setActiveTerminal(@createTerminal())
 
         window.termrk = @ if window.debug == true
 
     setupElements: ->
-        @container = @createContainer()
+        @containerView = @createContainer()
 
         @panel = atom.workspace.addBottomPanel(
-            item: @container
+            item: @containerView
             visible: false )
 
-        @panelHeight = Config.get('defaultHeight')
-        if not @panelHeight? or typeof @panelHeight isnt "number"
-            @panelHeight = 300
-
         @panelView = $(atom.views.getView(@panel))
-        @panelView.attr('data-height', @panelHeight)
         @panelView.addClass 'termrk-panel'
+        @panelView.attr('data-height', Config.defaultHeight)
         @panelView.height(0)
-
-        @containerView = $(@panelView.find('.termrk-container'))
 
         @makeResizable '.termrk-panel'
 
@@ -135,7 +126,8 @@ module.exports = Termrk =
             target.style.height = event.rect.height + 'px';
 
         .on 'resizeend', (event) =>
-            event.target.setAttribute 'data-height', event.target.style.height
+            Config.defaultHeight = parseInt event.target.style.height
+            @panelView.attr 'data-height', Config.defaultHeight
             @activeView.updateTerminalSize()
 
     ###
@@ -147,13 +139,19 @@ module.exports = Termrk =
             @div class: 'termrk-container'
 
     createTerminal: (options={}) ->
-        model = new TermrkModel(options)
-        termrkView = new TermrkView(model)
-        termrkView.height(0)
-
-        @views[termrkView.time] = termrkView
+        termrkView = new TermrkView
         @containerView.append termrkView
+        @views[termrkView.time] = termrkView # TODO manage by css selector
 
+        [cols, rows] = termrkView.calculateTerminalDimensions(
+            termrkView.find('.terminal').width(), Config.defaultHeight)
+
+        options.cols ?= cols
+        options.rows ?= rows
+
+        termrkView.start(options)
+
+        termrkView.height(0)
         return termrkView
 
     ###
@@ -252,13 +250,11 @@ module.exports = Termrk =
         @storeFocusedElement()
         @activeView?.focus()
 
-        height = @panelView.attr('data-height') ? @panelHeight
-
         @panelView.stop()
         @panelView.transition {
-            height: height
+            height: "#{Config.defaultHeight-2}px"
             }, 250, 'ease-in-out', =>
-            @activeView.activated()
+            @activeView?.activated()
             callback?()
 
     toggle: ->
@@ -318,7 +314,7 @@ module.exports = Termrk =
         @subscriptions.add atom.commands.add target, commands
 
     getPanelHeight: ->
-        @panelHeight
+        Config.defaultHeight
 
     storeFocusedElement: ->
         @focusedElement = $(document.activeElement)
