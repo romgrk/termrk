@@ -46,10 +46,13 @@ class TermrkConfig
     constructor: (packageName) ->
         @prefix = packageName + '.'
 
-        for key, desciption in @schema
-            Object.defineProperty this, key,
-                get: => @get key
-                set: (v) => @set key, v
+        for key, value  of @schema
+            getKey = @get.bind(@, key)
+            setKey = @set.bind(@, key)
+            descriptor =
+                get: getKey
+                set: setKey
+            Object.defineProperty this, key, descriptor
 
     get: (k) ->
         return atom.config.get (@prefix + k)
