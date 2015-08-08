@@ -65,7 +65,8 @@ class TermrkView extends View
         @div class: 'termrk', =>
             @span class: 'pid-label', outlet: 'pidLabel'
             @input class: 'input-keylistener'
-            @div class: 'terminal' # <= created by term.js
+            @div class: 'terminal', => # <= created by term.js
+                @div class: 'line'
 
     ###
     Section: Events
@@ -247,7 +248,7 @@ class TermrkView extends View
     getCharDimensions: ->
         font   = @find('.terminal').css 'font'
         width  = Font.getWidth("a", font)
-        height  = Font.getHeight("a", font)
+        height  = @find('.terminal > div:first-of-type').height()
         return [width, height]
 
     # Public: get the actual untoggled height
