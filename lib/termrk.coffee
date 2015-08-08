@@ -145,6 +145,7 @@ module.exports = Termrk =
 
         [cols, rows] = termrkView.calculateTerminalDimensions(
             termrkView.find('.terminal').width(), Config.defaultHeight)
+        cols = 80 if cols < 80 # FIXME 
 
         options.cols ?= cols
         options.rows ?= rows
