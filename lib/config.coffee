@@ -10,6 +10,9 @@ class TermrkConfig
 
     prefix: null
 
+    # TODO implement this
+    restartShell: true
+
     schema:
         # Shell options
         'shellCommand':
@@ -30,11 +33,11 @@ class TermrkConfig
             description: 'The parameters to pass through when creating the shell'
             type: 'string'
             default: ''
-        'restartShell':
-            title: 'Auto-restart'
-            description: 'Restarts the shell as soon as it is terminated.'
-            type: 'boolean'
-            default: 'true'
+        # 'restartShell':
+        #     title: 'Auto-restart'
+        #     description: 'Restarts the shell as soon as it is terminated.'
+        #     type: 'boolean'
+        #     default: 'true'
 
         # Rendering options
         'defaultHeight':
