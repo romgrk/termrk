@@ -19,9 +19,6 @@ Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
-# Makes it more readable when callback is inline
-delay = (ms, callback) -> setTimeout(callback, ms)
-
 module.exports =
 class TermrkView extends View
 
@@ -54,9 +51,6 @@ class TermrkView extends View
 
     # Public: creation time. Used as index {String}
     time: null
-
-    # Public: {pty.js:Terminal} process of the running shell
-    process: null
 
     # Private: {term.js:Terminal}
     termjs:     null
@@ -197,12 +191,12 @@ class TermrkView extends View
         @termjs.write("\x1b[31mProcess terminated.\x1b[m\r\n")
         @modelSubscriptions.dispose()
 
-    # Public: called after this terminal view has been activated
+    # Private: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
         @focus()
 
-    # Public: called after this terminal view has been deactivated
+    # Private: called after this terminal view has been deactivated
     deactivated: ->
         return unless document.activeElement is @input
         @blur()
@@ -298,18 +292,15 @@ class TermrkView extends View
     registerCommands: (target, commands) ->
         @subscriptions.add atom.commands.add target, commands
 
-    # Private: add subscription
-    subscribe: (disposable) ->
-        @subscriptions.add disposable
-
     # Public: returns an object that can be retrieved when package is activated
     serialize: ->
 
     # Tear down any state and detach
     destroy: ->
+        @modelSubscriptions.dispose()
+        @subscriptions.dispose()
         @model.destroy()
         @element.remove()
-        @subscriptions.dispose()
 
     getElement: ->
         @element
