@@ -1,11 +1,10 @@
 # current
 
 # issues
-* ptyjs resize
-* Termrk config entry => see SettingsView?
-* scroll
 
 # tasks
+* round panel height to terminal height
+* merge termrk-model and pty-task
 * reimplement config with Object.defineProp
 * enhance: add user commands
 * enhance: option: startup script
