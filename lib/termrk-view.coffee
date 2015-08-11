@@ -47,9 +47,10 @@ class TermrkView extends View
     Section: instance
     ###
 
-    model:         null
-    emitter:       null
-    subscriptions: null
+    model:              null
+    emitter:            null
+    subscriptions:      null
+    modelSubscriptions: null
 
     # Public: creation time. Used as index {String}
     time: null
@@ -64,10 +65,8 @@ class TermrkView extends View
 
     @content: ->
         @div class: 'termrk', =>
-            @span class: 'pid-label', outlet: 'pidLabel'
             @input class: 'input-keylistener'
-            @div class: 'terminal', => # <= created by term.js
-                @div class: 'line'
+            # @div class: 'terminal', => # <= created by term.js
 
     ###
     Section: Events
@@ -81,66 +80,70 @@ class TermrkView extends View
     ###
 
     # TODO use HTMLElement, to get an 'attached' event
-    initialize: (@options) ->
+    initialize: (@options={}) ->
         TermrkView.addInstance this
+        @options.name ?= 'xterm-256color'
 
-        @emitter       = new Emitter
-        @subscriptions = new CompositeDisposable
+        @emitter            = new Emitter
+        @subscriptions      = new CompositeDisposable
+        @modelSubscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
 
-        @updateFont()
-
-    # TODO document options
-    start: (options) ->
-        @options ?= {}
-        _.extend @options, options
-
-        @options.name  ?= 'xterm-256color'
-
-        @element.removeChild @find('.terminal')[0]
-
-        @termjs = new Terminal  # Do not feed it with a reference.
-            cols: @options.cols # It EATS the object. Make a deep copy.
+        @termjs = new Terminal
+            cols: @options.cols
             rows: @options.rows
             name: @options.name
         @termjs.open @element
 
-        @model = new TermrkModel @options
-        @model.spawnProcess(@options)
-
         @attachListeners()
+        @updateFont()
+
+    # TODO document options
+    start: (options) ->
+        _.extend @options, options
 
         @updateFont()
 
+        @model = new TermrkModel @options
+        @model.spawnProcess(@options)
+
+        @attachModelListeners()
+
+    # Private: add event listener and create disposable
+    addEventListener: (element, event, callback) ->
+        element.addEventListener event, callback
+        @subscriptions.add dispose: ->
+            element.removeEventListener event, callback
+
     # Private: attach listeners
     attachListeners: ->
-        add = (d) => @subscriptions.add d
+        @addEventListener @input, 'keydown', (e) => @inputKeydown(e)
+        @addEventListener @input, 'keypress', (e) => @termjs.keyPress(e)
+        @addEventListener @input, 'focus', => @termjs.focus()
+        @addEventListener @input, 'blur', => @termjs.blur()
 
-        @input.addEventListener 'keydown', @inputKeydown.bind(@), true
-        @input.addEventListener 'keypress', @termjs.keyPress.bind(@termjs)
-        @input.addEventListener 'focus', => @termjs.focus()
-        @input.addEventListener 'blur', => @termjs.blur()
+        @addEventListener @termjs.element, 'focus', => @input.focus()
+        @addEventListener @termjs.element, 'mousewheel', @terminalMousewheel.bind(@)
 
-        @termjs.element.addEventListener 'focus', =>
-            @input.focus()
-        @termjs.element.addEventListener 'mousewheel',
-            @terminalMousewheel.bind(@)
+        @addEventListener window, 'resize', => @updateTerminalSize()
 
-        @termjs.on 'data', (data) => @model.write(data)
+    # Private: attach model listeners
+    attachModelListeners: ->
+        add = (d) => @modelSubscriptions.add d
 
         add @model.onDidStartProcess (shellName) =>
             @termjs.write("\x1b[31mProcess started: #{@options.shell}\x1b[m\r\n")
-        add @model.onDidExitProcess (code, signal) =>
-            @termjs.write('\x1b[31mProcess terminated.\x1b[m\r\n')
-            @processExit(code, signal)
-        add @model.onDidReceiveData (data) =>
-            @termjs.write data
 
-        resizeHandler = @updateTerminalSize.bind(@)
-        window.addEventListener 'resize', resizeHandler
-        add dispose: ->
-            window.removeEventListener 'resize', resizeHandler
+        add @model.onDidExitProcess (code, signal) =>
+            @processExit(code, signal)
+
+        add @model.onDidReceiveData (data) => @termjs.write data
+
+        dataListener = (data) => @model.write(data)
+        @termjs.on 'data', dataListener
+        add dispose: =>
+            @termjs.off 'data', dataListener
 
     ###
     Section: event listeners
@@ -190,19 +193,18 @@ class TermrkView extends View
             @input.dispatchEvent keypressEvent
 
     # Private: pty exit callback
-    processExit: (code, signal) ->
-        # TODO
+    processExit: (event) ->
+        @termjs.write("\x1b[31mProcess terminated.\x1b[m\r\n")
+        @modelSubscriptions.dispose()
 
     # Public: called after this terminal view has been activated
     activated: ->
         @updateTerminalSize()
         @focus()
-        @pidLabel.addClass 'fade-out'
 
     # Public: called after this terminal view has been deactivated
     deactivated: ->
         return unless document.activeElement is @input
-        @pidLabel.removeClass 'fade-out'
         @blur()
 
     ###
@@ -246,7 +248,6 @@ class TermrkView extends View
 
         computedFont = @find('.terminal').css('font')
         @css 'font', computedFont
-        console.log computedFont
 
         @updateTerminalSize()
 
