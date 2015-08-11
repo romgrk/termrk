@@ -10,9 +10,6 @@ class TermrkConfig
 
     prefix: null
 
-    # TODO implement this
-    restartShell: true
-
     schema:
         # Shell options
         'shellCommand':
@@ -33,17 +30,16 @@ class TermrkConfig
             description: 'The parameters to pass through when creating the shell'
             type: 'string'
             default: ''
-        # 'restartShell':
-        #     title: 'Auto-restart'
-        #     description: 'Restarts the shell as soon as it is terminated.'
-        #     type: 'boolean'
-        #     default: 'true'
+        'restartShell':
+            title: 'Auto-restart'
+            description: 'Restarts the shell as soon as it is terminated.'
+            type: 'boolean'
+            default: 'true'
 
         # Rendering options
         'defaultHeight':
             title:       'Panel height'
-            description: 'Default height of the terminal-panel (in px)'
-            # TODO let user choose any css value
+            description: 'Height of the terminal-panel (in px)'
             type:        'integer'
             default:     300
         'fontSize':
@@ -110,10 +106,8 @@ class TermrkConfig
 
     getDefaultParameters: ->
         parameters = @get('shellParameters')
-        args = parameters.split(/\s+/g).filter (arg)-> arg
-        args
+        return parameters.split(/\s+/g).filter (arg)-> arg
 
-# TODO fix local name
 if atom.packages.getLoadedPackage('termrk')?
     name = 'termrk'
 else
