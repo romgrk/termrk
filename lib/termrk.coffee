@@ -1,7 +1,9 @@
 
 
 path                  = require 'path'
+fs                    = require 'fs-plus'
 interact              = require 'interact.js'
+CSON                  = require 'season'
 {CompositeDisposable} = require 'atom'
 {$$, View}            = require 'space-pen'
 $                     = require 'jquery.transit'
@@ -10,9 +12,6 @@ TermrkView  = require './termrk-view'
 TermrkModel = require './termrk-model'
 Config      = require './config'
 Utils       = require './utils'
-Font        = Utils.Font
-Keymap      = Utils.Keymap
-Paths       = Utils.Paths
 
 # TODO place this somewhere else & add more programs
 programsByExtname =
@@ -42,6 +41,9 @@ module.exports = Termrk =
     # Private: config description
     config: Config.schema
 
+    # Private: user commands
+    userCommands: null
+
     activate: (state) ->
         @$ = $
         @config = Config
@@ -68,7 +70,7 @@ module.exports = Termrk =
                 @setActiveTerminal @createTerminal()
                 @show()
             'termrk:create-terminal-current-dir': =>
-                @setActiveTerminal @createTerminal(cwd: Paths.current())
+                @setActiveTerminal @createTerminal(cwd: Utils.getCurrentDir())
                 @show()
 
         @registerCommands '.termrk',
@@ -82,8 +84,6 @@ module.exports = Termrk =
                 content = atom.clipboard.read()
                 @activeView.write(content)
                 @activeView.focus()
-
-        @registerCommands '.termrk',
             'termrk:close-terminal':   =>
                 @removeTerminal(@getActiveTerminal())
             'termrk:activate-next-terminal':   =>
@@ -92,6 +92,8 @@ module.exports = Termrk =
             'termrk:activate-previous-terminal':   =>
                 @setActiveTerminal(@getPreviousTerminal())
                 @show()
+
+        @loadUserCommands()
 
         @subscriptions.add Config.observe
             'fontSize':   -> TermrkView.fontChanged()
@@ -145,7 +147,7 @@ module.exports = Termrk =
 
         [cols, rows] = termrkView.calculateTerminalDimensions(
             termrkView.find('.terminal').width(), Config.defaultHeight)
-        cols = 80 if cols < 80 # FIXME 
+        cols = 80 if cols < 80 # FIXME
 
         options.cols ?= cols
         options.rows ?= rows
@@ -283,7 +285,7 @@ module.exports = Termrk =
         unless @panel.isVisible()
             @show => @focus()
         else
-            @storeFocusedElement()
+            @storeFocusedElement() unless @focusedElement?
             @activeView.focus()
 
     blur: () ->
@@ -304,15 +306,49 @@ module.exports = Termrk =
             @activeView.write "#{program} #{file}\n"
         # TODO search for #!
 
+    runUserCommand: (commandName, event) ->
+        command = @userCommands[commandName].command
+
+        command = command.replace /\$FILE/g, Utils.getCurrentFile()
+        command = command.replace /\$DIR/g, Utils.getCurrentDir()
+        command = command.replace /\$PROJECT/g, Utils.getProjectDir()
+
+        unless command[-1..] is '\n'
+            command += '\n'
+
+        @activeView.write(command)
+        @focus()
+
     ###
     Section: helpers
     ###
 
+    # createEditorFile: ->
+    #     editorFile = Utils.resolve Utils.getTmpDir(), 'editor'
+    #     content = atom.workspace.getActiveTextEditor().getText()
+    #     fs.writeFileSync editorFile, content
+
+    loadUserCommands: ->
+        userCommandsFile = Utils.resolve(
+            atom.getConfigDirPath(), Config.userCommandsFile)
+        try
+            @userCommands = CSON.readFileSync userCommandsFile
+        catch error
+            console.log "Termrk: couldn't load commands in #{userCommandsFile}"
+            console.error error if window.debug
+            @userCommands = {}
+            return
+
+        for commandName, description of @userCommands
+            scope = description.scope ? 'atom-workspace'
+            @registerCommands scope, "termrk:command-#{commandName}",
+                @runUserCommand.bind(@, commandName)
+
+    registerCommands: (args...) ->
+        @subscriptions.add atom.commands.add args...
+
     shellEscape: (s) ->
         s.replace(/(["\n'$`\\])/g,'\\$1')
-
-    registerCommands: (target, commands) ->
-        @subscriptions.add atom.commands.add target, commands
 
     getPanelHeight: ->
         Config.defaultHeight
