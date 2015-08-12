@@ -2,9 +2,6 @@
 {CompositeDisposable} = require 'atom'
 
 Utils  = require './utils'
-Font   = Utils.Font
-Keymap = Utils.Keymap
-Paths  = Utils.Paths
 
 class TermrkConfig
 
@@ -35,6 +32,15 @@ class TermrkConfig
             description: 'Restarts the shell as soon as it is terminated.'
             type: 'boolean'
             default: 'true'
+
+        'userCommandsFile':
+            title: 'User commands file'
+            description: 'File where your commands are stored.\n' +
+                         '(absolute or relative to ' +
+                         atom.getConfigDirPath() + ')'
+            type: 'string'
+            default: 'userCommands.cson'
+
 
         # Rendering options
         'defaultHeight':
@@ -99,9 +105,9 @@ class TermrkConfig
     # Public: path of the starting dir
     getStartingDir: ->
         switch @get('startingDir')
-            when 'home' then Paths.home()
-            when 'project' then Paths.project()
-            when 'cwd' then atom.workspace.getActiveTextEditor().getURI()
+            when 'home' then Utils.getHomeDir()
+            when 'project' then Utils.getProjectDir()
+            when 'cwd' then Utils.getCurrentDir()
             else process.cwd()
 
     getDefaultParameters: ->
