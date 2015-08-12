@@ -10,7 +10,7 @@ class TermrkConfig
     schema:
         # Shell options
         'shellCommand':
-            title:       'Command'
+            title:       'Shell'
             description: 'Command to call to start the shell. ' +
                          '(auto-detect or executable file)'
             type:        'string'
@@ -33,6 +33,12 @@ class TermrkConfig
             type: 'boolean'
             default: 'true'
 
+        # User options
+        'useDefaultKeymap':
+            title:       'Default keymap'
+            description: 'Use keymap provided by Termrk package'
+            type:        'boolean'
+            default:     'true'
         'userCommandsFile':
             title: 'User commands file'
             description: 'File where your commands are stored.\n' +
@@ -57,6 +63,7 @@ class TermrkConfig
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
+
 
     constructor: (packageName) ->
         @prefix = packageName + '.'
