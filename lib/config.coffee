@@ -36,7 +36,9 @@ class TermrkConfig
         # User options
         'useDefaultKeymap':
             title:       'Default keymap'
-            description: 'Use keymap provided by Termrk package'
+            description: 'Use keymap provided by Termrk package.\n' +
+                         'Do not forget to add your own bindings if '+
+                         'you disable this.'
             type:        'boolean'
             default:     'true'
         'userCommandsFile':
@@ -56,7 +58,7 @@ class TermrkConfig
             default:     300
         'fontSize':
             title:       'Font size'
-            description: 'CSS style, defaults to px if no unit is specified'
+            description: 'Size of the font in terminal'
             type:        'string'
             default:     '14px'
         'fontFamily':
