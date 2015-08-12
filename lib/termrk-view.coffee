@@ -257,13 +257,9 @@ class TermrkView extends View
     # Public: get terminal element font
     getCharDimensions: ->
         font   = @find('.terminal').css 'font'
-        width  = Font.getWidth("a", font)
+        width  = Utils.getFontWidth("a", font)
         height  = @find('.terminal > div:first-of-type').height()
         return [width, height]
-
-    # Public: get the actual untoggled height
-    getPanelHeight: ->
-        return require('./termrk').getPanelHeight()
 
     # Public: focus terminal
     focus: ->
