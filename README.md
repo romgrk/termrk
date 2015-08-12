@@ -1,7 +1,15 @@
 *Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 
-Spawns default system shell in a sliding panel. Supports multiple terminal sessions.
-Basic features include inserting current file path, copy/pasting and setting/fonts config.
+Spawns default system shell in a sliding panel.
+Basic features include:
+- user-defined commands
+- multiple terminal sessions
+- running current file in terminal [1]
+- inserting selection
+- inserting current file path
+- color/font styling
+
+[1] currently, only supports .js, .node, .coffee, .py and `#!`
 
 *If some feature that you'd like to see isn't implemented, don't hesitate to create a request.*
 
@@ -18,6 +26,8 @@ Running vim:
 [link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
 
 ## Keybindings
+
+*Disable all default keybindings in SettingsView >> Termrk >> Default keymap*
 
 #### workspace
 
@@ -41,22 +51,49 @@ Running vim:
 
 ## Commands
 
-Name | Action | Binding
+Name | Action | Scope, Binding
 ---- | ---- | ----
 `termrk:toggle` | Toggle termrk panel | `atom-workspace`, `alt-space`
-`termrk:hide` | Hide termrk panel | none
-`termrk:show` | Show termrk panel | none
-`termrk:toggle-focus` | Toggle focus of termrk panel | none
-`termrk:focus` | Focus termrk panel | none
-`termrk:blur` | Blur termrk panel | none
+`termrk:hide` | Hide termrk panel | `atom-workspace`
+`termrk:show` | Show termrk panel | `atom-workspace`
+`termrk:toggle-focus` | Toggle focus of termrk panel | `atom-workspace`
+`termrk:focus` | Focus termrk panel | `atom-workspace`
+`termrk:blur` | Blur termrk panel | `atom-workspace`
+`termrk:create-terminal` | Creates new session | `atom-workspace`, `ctrl-space`
 `termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace`, `ctrl-alt-space`
-`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-sphift-space`
 `termrk:close-terminal` | Close active terminal session | `.termrk`, `ctrl-escape`
+`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-sphift-space`
 `termrk:insert-filename` | Insert current file's path in terminal | `.termrk`, `% f`
+`termrk:run-current-file` | Runs current file in terminal | `atom-workspace`
 
 Other:
 `termrk:create-terminal`, `termrk:activate-next-terminal`,
 `termrk:activate-previous-terminal`
+
+# User commands (experimental)
+
+You can define your own set of commands in `$ATOM_HOME/userCommands.cson`.
+*(file name can be changed in settings)*
+
+Commands have this format:
+
+```coffeescript
+'echofile':
+  command: 'echo The current file is $FILE'
+```
+The previous command description will be mapped to `'termrk:command-echofile'`.
+
+Available vars:
+
+name | input from
+-- | --
+`$FILE` | `atom.workspace.getActiveTextEditor().getURI()`
+`$DIR` | `path.dirname $FILE`
+`$PROJECT` | `atom.project.getPaths()[0]`
+
+*Not actual vars! Using String.replace*
+
+Again, this is experimental. Therefore, it is subject to change. Feedback is welcome.
 
 ## Styling
 
