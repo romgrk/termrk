@@ -1,6 +1,6 @@
 
 
-path                  = require 'path'
+Path                  = require 'path'
 fs                    = require 'fs-plus'
 interact              = require 'interact.js'
 CSON                  = require 'season'
@@ -95,11 +95,16 @@ module.exports = Termrk =
 
         @loadUserCommands()
 
+        @loadKeymap()
+
         @subscriptions.add Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
+            'useDefaultKeymap': @loadKeymap.bind(@)
 
+        # Create elements and activate
         @setupElements()
+
         @setActiveTerminal(@createTerminal())
 
         window.termrk = @ if window.debug == true
@@ -301,10 +306,19 @@ module.exports = Termrk =
 
     runCurrentFile: () ->
         file = atom.workspace.getActiveTextEditor().getURI()
-        extname = path.extname file
-        if (program = programsByExtname[extname])?
-            @activeView.write "#{program} #{file}\n"
-        # TODO search for #!
+        extname = Path.extname file
+
+        firstLine = atom.workspace.getActiveTextEditor().lineTextForBufferRow(0)
+        if (shebang = firstLine.match /#!(.+)$/)
+            program = shebang[1]
+        else if programsByExtname[extname]?
+            program = programsByExtname[extname]
+        else
+            console.log "Termrk: couldnt run file #{file}"
+            return
+
+        @activeView.write "#{program} #{file}\n"
+        @focus()
 
     runUserCommand: (commandName, event) ->
         command = @userCommands[commandName].command
@@ -346,6 +360,17 @@ module.exports = Termrk =
 
     registerCommands: (args...) ->
         @subscriptions.add atom.commands.add args...
+
+    # Private: updates package keymap
+    loadKeymap: ->
+        keymapPath = Path.resolve __dirname, '../res/termrk.cson'
+        if Config.useDefaultKeymap
+            atom.keymaps.loadKeymap(keymapPath)
+            console.log 'loaded ', keymapPath
+        else
+            atom.keymaps.removeBindingsFromSource keymapPath
+            console.log 'removed ', keymapPath
+
 
     shellEscape: (s) ->
         s.replace(/(["\n'$`\\])/g,'\\$1')
