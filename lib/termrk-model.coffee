@@ -9,10 +9,8 @@ TermrkView = require './termrk-view'
 
 Config = require './config'
 Utils  = require './utils'
-Font   = Utils.Font
-Keymap = Utils.Keymap
-Paths  = Utils.Paths
 
+# TODO merge this with pty-task
 module.exports =
 class TermrkModel
 
