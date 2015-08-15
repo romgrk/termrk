@@ -121,6 +121,7 @@ class TermrkConfig
 
     getDefaultParameters: ->
         parameters = @get('shellParameters')
+        # TODO handle 'quoted' args
         return parameters.split(/\s+/g).filter (arg)-> arg
 
 if atom.packages.getLoadedPackage('termrk')?
