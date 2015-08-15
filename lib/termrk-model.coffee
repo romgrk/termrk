@@ -75,7 +75,6 @@ class TermrkModel
         @pty.on 'exit', (code, signal) =>
             delete @pty
             @emitter.emit 'exit', {code, signal}
-            @spawnProcess() if Config.restartShell
 
         @emitter.emit 'start', @options.shell
 

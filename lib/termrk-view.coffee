@@ -38,7 +38,6 @@ class TermrkView extends View
     @fontChanged: =>
         @instances.forEach (instance) ->
             instance.updateFont.call(instance)
-            instance.updateTerminalSize.call(instance)
 
     ###
     Section: instance
@@ -80,7 +79,6 @@ class TermrkView extends View
 
         @emitter            = new Emitter
         @subscriptions      = new CompositeDisposable
-        @modelSubscriptions = new CompositeDisposable
 
         @input = @element.querySelector 'input'
 
@@ -124,6 +122,7 @@ class TermrkView extends View
 
     # Private: attach model listeners
     attachModelListeners: ->
+        @modelSubscriptions = new CompositeDisposable
         add = (d) => @modelSubscriptions.add d
 
         add @model.onDidStartProcess (shellName) =>
@@ -135,9 +134,9 @@ class TermrkView extends View
         add @model.onDidReceiveData (data) => @termjs.write data
 
         dataListener = (data) => @model.write(data)
-        @termjs.on 'data', dataListener
+        @termjs.addListener 'data', dataListener
         add dispose: =>
-            @termjs.off 'data', dataListener
+            @termjs.removeListener 'data', dataListener
 
     ###
     Section: event listeners
@@ -150,9 +149,11 @@ class TermrkView extends View
         if event.defaultPrevented
             event.stopImmediatePropagation()
             return false
-        else
+        else if @model?
             allow = @termjs.keyDown.call(@termjs, event)
             return allow
+        else
+            @start() if event.keyCode == 13 # enter
 
     # Private: mouseWheel event callback
     terminalMousewheel: (event) =>
@@ -189,7 +190,15 @@ class TermrkView extends View
     # Private: pty exit callback
     processExit: (event) ->
         @termjs.write("\x1b[31mProcess terminated.\x1b[m\r\n")
+
         @modelSubscriptions.dispose()
+        @model.destroy()
+        delete @model
+
+        if Config.restartShell
+            @start()
+        else
+            @termjs.write("\x1b[31mPress Enter to restart \x1b[m")
 
     # Private: called after this terminal view has been activated
     activated: ->
@@ -230,7 +239,7 @@ class TermrkView extends View
         return if cols == 100
 
         @termjs.resize cols, rows
-        @model.resize  cols, rows
+        @model.resize  cols, rows if @model?
 
         @emitter.emit 'resize', {cols, rows}
 
@@ -295,14 +304,11 @@ class TermrkView extends View
     destroy: ->
         @modelSubscriptions.dispose()
         @subscriptions.dispose()
-        @model.destroy()
+        @model?.destroy()
         @element.remove()
 
     getElement: ->
         @element
-
-    getParent: ->
-        $(@parent()[0])
 
     getModel: ->
         @model
