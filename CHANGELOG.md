@@ -1,3 +1,13 @@
+## 0.1.25
+* user commands: see README.md
+* command run-current-file now supports shebang (#!)
+* setting useDefaultKeymap: toggles termrk default Keybindings
+* setting restartShell: auto-restart shell
+* fixed: scroll terminal
+
+## 0.1.24
+* add command `termrk:run-current-file`
+
 ## 0.1.18
 * In config, setting startingDir to `cwd` spawns sessions in current file's
   directory
