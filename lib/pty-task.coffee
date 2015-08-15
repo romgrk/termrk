@@ -7,8 +7,8 @@ module.exports = (ptyCwd, args, options) ->
     ptyProcess = pty.fork ptyCwd, args, options
 
     ptyProcess.on 'data', (data) -> emit('data', data)
-    ptyProcess.on 'exit', ->
-        emit('exit')
+    ptyProcess.on 'exit', (code, signal) ->
+        emit('exit', {code, signal})
         callback()
 
     process.on 'message', ({event, cols, rows, text}={}) ->
