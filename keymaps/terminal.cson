@@ -1,4 +1,7 @@
 
+'atom-workspace':
+    'alt-space': 'termrk:toggle'
+
 '.termrk':
     'enter':           'native!'
     'backspace':       'native!'
