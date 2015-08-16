@@ -23,7 +23,7 @@ Running basic bash:
 Running vim:
 
 ![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
-[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
 
 ## Keybindings
 
