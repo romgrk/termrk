@@ -1,7 +1,7 @@
 # current
 
 # issues
-* send-selection
+* international characters not inserting properly
 * switch terminal animation: handle in termrk.coffee
 * terminalElement height: fix implementation
 
@@ -20,3 +20,5 @@
 
 
 # fixed/changed
+* issue: insert-selection not working
+* insert-selection doesnt respect line-breaks
