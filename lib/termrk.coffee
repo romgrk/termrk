@@ -60,7 +60,7 @@ module.exports = Termrk =
             'termrk:blur':              => @blur()
 
             'termrk:insert-selection':  =>
-                @insertSelection.bind(@)
+                @insertSelection()
                 @show()
             'termrk:run-current-file':  =>
                 @runCurrentFile()
@@ -271,21 +271,14 @@ module.exports = Termrk =
         else
             @show()
 
+    # Private: insert selected text in active terminal
     insertSelection: (event) ->
         return unless @activeView?
+        editor = atom.workspace.getActiveTextEditor()
+        @activeView.write sel.getText()  for sel in editor.getSelections()
+        @activeView.focus()
 
-        unless @panel.isVisible()
-            @show @insertSelection.bind(@)
-        else
-            editor    = atom.workspace.getActiveTextEditor()
-            selection = editor.getSelections()[0]
-
-            text = selection.getText()
-            text = text.replace /(\n)/g, '\\$1'
-
-            @activeView.write text
-            @activeView.focus()
-
+    # Public: focus active terminal and show panel if it isnt visisble
     focus: () ->
         unless @panel.isVisible()
             @show => @focus()
