@@ -20,5 +20,3 @@
 
 
 # fixed/changed
-* issue: insert-selection not working
-* insert-selection doesnt respect line-breaks

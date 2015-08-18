@@ -1,3 +1,7 @@
+## 0.1.26
+* fixed: insert-selection not working
+* fixed: insert-selection not respecting line-breaks
+
 ## 0.1.25
 * user commands: see README.md
 * command run-current-file now supports shebang (#!)
