@@ -70,7 +70,8 @@ module.exports = Termrk =
                 @setActiveTerminal @createTerminal()
                 @show()
             'termrk:create-terminal-current-dir': =>
-                @setActiveTerminal @createTerminal(cwd: Utils.getCurrentDir())
+                return unless (currentDir = Utils.getCurrentDir())?
+                @setActiveTerminal @createTerminal(cwd: currentDir)
                 @show()
 
         @registerCommands '.termrk',

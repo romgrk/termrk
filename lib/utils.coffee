@@ -22,9 +22,9 @@ Utils =
             'visibility': 'hidden',
             'font': font})
         .appendTo($('body'))
-        w = o.width();
+        w = o.width()
 
-        o.remove();
+        o.remove()
 
         return w
 
@@ -40,9 +40,9 @@ Utils =
             'visibility': 'hidden',
             'font': font})
         .appendTo($('body'))
-        h = o.height();
+        h = o.height()
 
-        o.remove();
+        o.remove()
 
         return h
 
@@ -58,10 +58,14 @@ Utils =
         atom.project.getPaths()[0] ? Fs.getHomeDirectory()
 
     getCurrentDir: ->
-        Path.dirname atom.workspace.getActiveTextEditor().getURI()
+        editor = atom.workspace.getActiveTextEditor()
+        return Path.dirname editor.getURI() if editor?
+        return null
 
     getCurrentFile: ->
-        atom.workspace.getActiveTextEditor().getURI()
+        editor = atom.workspace.getActiveTextEditor()
+        return editor.getURI() if editor?
+        return null
 
     resolve: (args...) ->
         args = (Fs.normalize a for a in args)
