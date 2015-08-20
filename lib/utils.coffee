@@ -29,11 +29,10 @@ Utils =
         return w
 
     # Public: get the height of the text with specified font
-
     getFontHeight: (text, font) ->
         font = font || $('body').css('font')
         o = $('<div>' + text + '</div>')
-        .css({
+        .css({ 
             'position': 'absolute',
             'float': 'left',
             'white-space': 'nowrap',
@@ -41,13 +40,10 @@ Utils =
             'font': font})
         .appendTo($('body'))
         h = o.height()
-
         o.remove()
-
         return h
 
-
-# Path etc
+    # Path etc
     getHomeDir: ->
         Fs.getHomeDirectory()
 

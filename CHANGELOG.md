@@ -1,3 +1,6 @@
+## 0.1.27
+* fixed: error on 'create-terminal-current-dir' when no active editor
+
 ## 0.1.26
 * fixed: insert-selection not working
 * fixed: insert-selection not respecting line-breaks
