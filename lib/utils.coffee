@@ -32,7 +32,7 @@ Utils =
     getFontHeight: (text, font) ->
         font = font || $('body').css('font')
         o = $('<div>' + text + '</div>')
-        .css({ 
+        .css({
             'position': 'absolute',
             'float': 'left',
             'white-space': 'nowrap',
@@ -55,12 +55,12 @@ Utils =
 
     getCurrentDir: ->
         editor = atom.workspace.getActiveTextEditor()
-        return Path.dirname editor.getURI() if editor?
+        return Path.dirname editor.getPath() if editor?
         return null
 
     getCurrentFile: ->
         editor = atom.workspace.getActiveTextEditor()
-        return editor.getURI() if editor?
+        return editor.getPath() if editor?
         return null
 
     resolve: (args...) ->
