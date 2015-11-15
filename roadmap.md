@@ -2,10 +2,11 @@
 
 # issues
 * international characters not inserting properly
-* switch terminal animation: handle in termrk.coffee
-* terminalElement height: fix implementation
+* view bugs with multiline commands in terminal-history
 
 # tasks
+* terminalElement height: fix implementation
+* switch terminal animation: handle in termrk.coffee
 * round panel height to terminal height
 * merge termrk-model and pty-task
 * enhance: option: startup script
