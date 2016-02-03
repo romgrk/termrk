@@ -5,6 +5,7 @@ pty = require 'pty.js'
 
 {Emitter}             = require 'atom'
 {CompositeDisposable} = require 'atom'
+clipboard             = require 'clipboard'
 {$$, View}            = require 'space-pen'
 {Key, KeyKit}         = require 'keykit'
 
@@ -112,10 +113,11 @@ class TermrkView extends View
 
     # Private: attach listeners
     attachListeners: ->
-        @addEventListener @input, 'keydown', (e) => @inputKeydown(e)
-        @addEventListener @input, 'keypress', (e) => @termjs.keyPress(e)
         @addEventListener @input, 'focus', => @termjs.focus()
         @addEventListener @input, 'blur', => @termjs.blur()
+        @addEventListener @input, 'paste', (e) => @inputPaste(e)
+        @addEventListener @input, 'keydown', (e) => @inputKeydown(e)
+        @addEventListener @input, 'keypress', (e) => @termjs.keyPress(e)
 
         @addEventListener @termjs.element, 'focus', => @input.focus()
         @addEventListener @termjs.element, 'mousewheel', @terminalMousewheel.bind(@)
@@ -156,6 +158,13 @@ class TermrkView extends View
             return allow
         else
             @start() if event.keyCode == 13 # enter
+
+    # Private: input 'paste' event callback
+    inputPaste: (event) =>
+        if process.platform isnt 'linux' # implemented specifically for
+          return                         # middle-click-paste on Xorg server
+        console.debug('inputPaste:', event) if window.debug
+        @write clipboard.readText('selection')
 
     # Private: mouseWheel event callback
     terminalMousewheel: (event) =>
