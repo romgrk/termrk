@@ -1,25 +1,27 @@
-# *Termrk*
+# Termrk
 > Sliding terminal panel for Atom.
 
 There are various implementations of terminals for Atom; each with their own
 vision/perspective.  The main focus of this one is to have a slick, quickly
 accessible terminal panel: handy when you need it; out-of-the way when you
 don't.
+It slides in and out with a single keystroke, mapped to `alt-space` by
+default. Efficient and simple.
 
-1. [Overview](#Overview)
-2. [Keybindings](#Keybindings)
-3. [Commands](#Commands)
-4. [User-commands](#User-commands)
-5. [Styling](#Styling)
-6. [Credits](#Credits)
-7. [License](#License)
+1. [Overview](#overview)
+2. [Keybindings](#keybindings)
+3. [Commands](#commands)
+4. [User-commands](#user-commands)
+5. [Styling](#styling)
+6. [Credits](#credits)
+7. [License](#license)
 
 ## Overview
 
 ![Termrk Screenshot](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
 <small>Termrk existing.</small>
 
-Currently implemented:
+**Currently implemented:**
  - multiple terminal sessions
  - user defined commands (→ user defined *atom-commands*)
  - running current file in terminal 
@@ -34,22 +36,24 @@ Currently implemented:
 
 ![vim demo](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
 
-## Keybindings
+## ⌨  Keybindings
 
-*Disable all default keybindings in SettingsView >> Termrk >> Default keymap*
+Designed around the `alt-space` keystroke really. It is often unmapped,  and
+very easy to access.
 
-#### workspace
+**→ workspace**
 
-- `alt-space`:      toggle terminal panel
-- `ctrl-alt-space`: create terminal in current file's dir
-- `ctrl-alt-shift-space`: insert current selection in active terminal
+`alt-space`:      toggle terminal panel
+`ctrl-alt-space`: create terminal in current file's dir
+`ctrl-alt-shift-space`: insert current selection in active terminal
 
-#### inside terminal
+**→ inside terminal**
 
-- `ctrl-escape`:    close current terminal
-- `ctrl-space`:     create terminal
-- `ctrl-tab`:       activate next terminal
-- `ctrl-shift-tab`: activate previous terminal
+`ctrl-escape`:    close current terminal
+`ctrl-space`:     create terminal
+`ctrl-tab`:       activate next terminal
+`ctrl-shift-tab`: activate previous terminal
+
 
 **Note**: if a `keystroke` is catched by an atom-command but you need it inside terminal, add the following code to you `keymap.cson`.
 
