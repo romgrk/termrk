@@ -69,6 +69,7 @@ class Terminal extends termjs.Terminal
         # @constructor.bindKeys()
         @focus()
 
+        # FIXME?
         setTimeout( ->
             self.element.focus()
         , 100)

@@ -1,31 +1,38 @@
-
-## *Termrk*
-― Sliding terminal panel for Atom.
+# *Termrk*
+> Sliding terminal panel for Atom.
 
 There are various implementations of terminals for Atom; each with their own
-vision/perspective. The main focus of this one is to have a slick, quickly
-accessible terminal panel; handy when you need it; out-of-the way when you
+vision/perspective.  The main focus of this one is to have a slick, quickly
+accessible terminal panel: handy when you need it; out-of-the way when you
 don't.
+
+1. [Overview](#Overview)
+2. [Keybindings](#Keybindings)
+3. [Commands](#Commands)
+4. [User-commands](#User-commands)
+5. [Styling](#Styling)
+6. [Credits](#Credits)
+7. [License](#License)
+
+## Overview
 
 ![Termrk Screenshot](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
 <small>Termrk existing.</small>
 
 Currently implemented:
-- multiple terminal sessions
-- user defined commands (→ user defined *atom-commands*)
-- running current file in terminal 
-  (supports `.js`, `.node`, `.coffee`, `.py` and shebang-notation―`#!`)
-- inserting selection to/from the buffer
-- inserting current file/directory path
-- color/font styling
+ - multiple terminal sessions
+ - user defined commands (→ user defined *atom-commands*)
+ - running current file in terminal 
+   (supports `.js`, `.node`, `.coffee`, `.py` and shebang-notation―`#!`)
+ - inserting selection to/from the buffer
+ - inserting current file/directory path
+ - color/font styling
 
-*Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 *If some feature that you'd like to see isn't implemented, don't hesitate to create a request.*
 
-## Demo: running *vim* inside *termrk* inside *atom*
+#### Demo: running *vim* inside *termrk* inside *atom*
 
-![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif?raw=true)
-[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif?raw=true)
+![vim demo](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
 
 ## Keybindings
 
@@ -46,7 +53,7 @@ Currently implemented:
 
 **Note**: if a `keystroke` is catched by an atom-command but you need it inside terminal, add the following code to you `keymap.cson`.
 
-```
+```coffee
 '.termrk':
   'KEYSTROKE_TO_CATCH': 'native!'
 ```
@@ -71,23 +78,38 @@ Currently implemented:
 | `termrk:activate-next-terminal`      | Cycles forward terminal-sessions            | `atom-workspace` |                         |
 | `termrk:activate-previous-terminal`  | Cycles backward terminal-sessions           | `atom-workspace` |                         |
 
-# User commands
+## User-commands
 
 User commands are defined in the file `$ATOM_HOME/userCommands.cson`.
 (file path can be configured *via* Atom Settings)
 
 Commands have this format:
-
 ```coffeescript
 'echofile':
   command: 'echo The current file is $FILE'
 ```
-The previous command description would be mapped to `'termrk:command-echofile'`.
+The previous command description would be mapped to `'termrk:command-echofile'`,
+and calling that command would run `'echo The current file is $FILE'` in 
+terminal.
+
+Other examples: 
+```coffeescript
+'shellreplace':
+  'command': 'gnome-shell --replace --display :0'
+
+'coffeerun':
+  'command': 'coffee $FILE'
+
+'npmyes':
+  'command': 'cd $DIR && npm init --yes'
+
+# ...
+```
 
 Defined variables:
 
-| name       | value                                           |
-| --         | --                                              |
+| Name       | Value                                           |
+| ----       | -----                                           |
 | `$FILE`    | `atom.workspace.getActiveTextEditor().getURI()` |
 | `$DIR`     | `path.dirname $FILE`                            |
 | `$PROJECT` | `atom.project.getPaths()[0]`                    |
@@ -95,10 +117,11 @@ Defined variables:
 The variables aren´t really defined in the environment — using plain `String.replace`.
 
 ## Styling
+(through less/css)
 
-Example, for black text on white bg, and blue cursor-bg.
+Example for black text on white bg, and blue cursor-bg.
 
-```less
+```css
 .termrk .terminal {
     color: black;
     background-color: blue;
@@ -110,6 +133,21 @@ Example, for black text on white bg, and blue cursor-bg.
 }
 ```
 
+## Credits
+
+Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] 
+modules by Christopher Jeffrey.
+
+Atom is a text-editor developped by github etc. etc....
+
+## License
+
+> Same as JSON
+
+
+--------------------------------------------------------
+
 [term]: https://github.com/chjj/term.js
 [pty]:  https://github.com/chjj/pty.js
+
 <!-- lang: coffee -->
