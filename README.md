@@ -1,24 +1,29 @@
-*Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 
-Spawns default system shell in a sliding panel.
-Basic features include:
-- user-defined commands
+## *Termrk*
+― Sliding terminal panel for Atom.
+
+There are various implementations of terminals for Atom; each with their own
+vision/perspective. The main focus of this one is to have a slick, quickly
+accessible terminal panel; handy when you need it; out-of-the way when you
+don't.
+
+![basic](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+
+Currently implemented:
 - multiple terminal sessions
+- user defined commands (→ user defined *atom-commands*)
 - running current file in terminal [1]
-- inserting selection
-- inserting current file path
+- inserting selection to/from the buffer
+- inserting current file/directory path
 - color/font styling
 
 [1] currently, only supports .js, .node, .coffee, .py and `#!`
 
+*Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 *If some feature that you'd like to see isn't implemented, don't hesitate to create a request.*
 
-## Examples
-
-Running basic bash:
-
-![basic](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
-[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+## Demo: running *vim* inside *termrk* inside *atom*
 
 Running vim:
 
@@ -110,3 +115,4 @@ Example, for black text on white bg, and blue cursor-bg.
 
 [term]: https://github.com/chjj/term.js
 [pty]:  https://github.com/chjj/pty.js
+<!-- lang: coffee -->
