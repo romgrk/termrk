@@ -7,28 +7,25 @@ vision/perspective. The main focus of this one is to have a slick, quickly
 accessible terminal panel; handy when you need it; out-of-the way when you
 don't.
 
-![basic](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
-[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/out.gif)
+![Termrk Screenshot](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
+<small>Termrk existing.</small>
 
 Currently implemented:
 - multiple terminal sessions
 - user defined commands (→ user defined *atom-commands*)
-- running current file in terminal [1]
+- running current file in terminal 
+  (supports `.js`, `.node`, `.coffee`, `.py` and shebang-notation―`#!`)
 - inserting selection to/from the buffer
 - inserting current file/directory path
 - color/font styling
-
-[1] currently, only supports .js, .node, .coffee, .py and `#!`
 
 *Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] modules by Christopher Jeffrey.*
 *If some feature that you'd like to see isn't implemented, don't hesitate to create a request.*
 
 ## Demo: running *vim* inside *termrk* inside *atom*
 
-Running vim:
-
-![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
-[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif)
+![vim](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif?raw=true)
+[link](http://raw.githubusercontent.com/romgrk/termrk/master/static/vim.gif?raw=true)
 
 ## Keybindings
 
