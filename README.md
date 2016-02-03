@@ -51,29 +51,28 @@ Running vim:
 
 ## Commands
 
-Name | Action | Scope, Binding
----- | ---- | ----
-`termrk:toggle` | Toggle termrk panel | `atom-workspace`, `alt-space`
-`termrk:hide` | Hide termrk panel | `atom-workspace`
-`termrk:show` | Show termrk panel | `atom-workspace`
-`termrk:toggle-focus` | Toggle focus of termrk panel | `atom-workspace`
-`termrk:focus` | Focus termrk panel | `atom-workspace`
-`termrk:blur` | Blur termrk panel | `atom-workspace`
-`termrk:create-terminal` | Creates new session | `atom-workspace`, `ctrl-space`
-`termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace`, `ctrl-alt-space`
-`termrk:close-terminal` | Close active terminal session | `.termrk`, `ctrl-escape`
-`termrk:insert-selection` | Inserts current selection in terminal | `atom-workspace`, `ctrl-alt-sphift-space`
-`termrk:insert-filename` | Insert current file's path in terminal | `.termrk`, `% f`
-`termrk:run-current-file` | Runs current file in terminal | `atom-workspace`
+| Name                                 | Action                                      | Scope            | Keybinding              |
+| ----                                 | ----                                        | ----             | ----                    |
+| `termrk:toggle`                      | Toggle termrk panel                         | `atom-workspace` | `alt-space`             |
+| `termrk:hide`                        | Hide termrk panel                           | `atom-workspace` |                         |
+| `termrk:show`                        | Show termrk panel                           | `atom-workspace` |                         |
+| `termrk:toggle-focus`                | Toggle focus of termrk panel                | `atom-workspace` |                         |
+| `termrk:focus`                       | Focus termrk panel                          | `atom-workspace` |                         |
+| `termrk:blur`                        | Blur termrk panel                           | `atom-workspace` |                         |
+| `termrk:create-terminal`             | Creates new session                         | `atom-workspace` | `ctrl-space`            |
+| `termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace` | `ctrl-alt-space`        |
+| `termrk:close-terminal`              | Close active terminal session               | `.termrk`        | `ctrl-escape`           |
+| `termrk:insert-selection`            | Inserts current selection in terminal       | `atom-workspace` | `ctrl-alt-sphift-space` |
+| `termrk:insert-filename`             | Insert current file's path in terminal      | `.termrk`        | `% f`                   |
+| `termrk:run-current-file`            | Runs current file in terminal               | `atom-workspace` |                         |
+| `termrk:create-terminal`             | Creates a terminal-session                  | `atom-workspace` |                         |
+| `termrk:activate-next-terminal`      | Cycles forward terminal-sessions            | `atom-workspace` |                         |
+| `termrk:activate-previous-terminal`  | Cycles backward terminal-sessions           | `atom-workspace` |                         |
 
-Other:
-`termrk:create-terminal`, `termrk:activate-next-terminal`,
-`termrk:activate-previous-terminal`
+# User commands
 
-# User commands (experimental)
-
-You can define your own set of commands in `$ATOM_HOME/userCommands.cson`.
-*(file name can be changed in settings)*
+User commands are defined in the file `$ATOM_HOME/userCommands.cson`.
+(file path can be configured *via* Atom Settings)
 
 Commands have this format:
 
@@ -81,19 +80,17 @@ Commands have this format:
 'echofile':
   command: 'echo The current file is $FILE'
 ```
-The previous command description will be mapped to `'termrk:command-echofile'`.
+The previous command description would be mapped to `'termrk:command-echofile'`.
 
-Available vars:
+Defined variables:
 
-name | input from
--- | --
-`$FILE` | `atom.workspace.getActiveTextEditor().getURI()`
-`$DIR` | `path.dirname $FILE`
-`$PROJECT` | `atom.project.getPaths()[0]`
+| name       | value                                           |
+| --         | --                                              |
+| `$FILE`    | `atom.workspace.getActiveTextEditor().getURI()` |
+| `$DIR`     | `path.dirname $FILE`                            |
+| `$PROJECT` | `atom.project.getPaths()[0]`                    |
 
-*Not actual vars! Using String.replace*
-
-Again, this is experimental. Therefore, it is subject to change. Feedback is welcome.
+The variables aren´t really defined in the environment — using plain `String.replace`.
 
 ## Styling
 
