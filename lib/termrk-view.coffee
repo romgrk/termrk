@@ -72,7 +72,8 @@ class TermrkView extends View
     Section: init/setup
     ###
 
-    # TODO use HTMLElement, to get an 'attached' event
+    # Private: setup
+    # TODO use HTMLElement, so we can get an 'attached' event
     initialize: (@options={}) ->
         TermrkView.addInstance this
         @options.name ?= 'xterm-256color'
@@ -102,7 +103,8 @@ class TermrkView extends View
 
         @attachModelListeners()
 
-    # Private: add event listener and create disposable
+    # Private: add event listener and add the created disposable
+    # to the @subscriptions list
     addEventListener: (element, event, callback) ->
         element.addEventListener event, callback
         @subscriptions.add dispose: ->

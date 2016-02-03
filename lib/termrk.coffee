@@ -331,11 +331,7 @@ module.exports = Termrk =
     Section: helpers
     ###
 
-    # createEditorFile: ->
-    #     editorFile = Utils.resolve Utils.getTmpDir(), 'editor'
-    #     content = atom.workspace.getActiveTextEditor().getText()
-    #     fs.writeFileSync editorFile, content
-
+    # Private: load the userCommands file or fail silently
     loadUserCommands: ->
         userCommandsFile = Utils.resolve(
             atom.getConfigDirPath(), Config.userCommandsFile)
@@ -343,7 +339,8 @@ module.exports = Termrk =
             @userCommands = CSON.readFileSync userCommandsFile
         catch error
             console.log "Termrk: couldn't load commands in #{userCommandsFile}"
-            console.error error if window.debug
+            if error.code != "ENOENT"
+              console.error error if window.debug
             @userCommands = {}
             return
 
@@ -365,7 +362,6 @@ module.exports = Termrk =
             atom.keymaps.removeBindingsFromSource keymapPath
             console.log 'removed ', keymapPath
 
-
     shellEscape: (s) ->
         s.replace(/(["\n'$`\\])/g,'\\$1')
 
@@ -385,5 +381,7 @@ module.exports = Termrk =
         @panel.destroy()
         @subscriptions.dispose()
 
+    # Public: not implemented
     serialize: ->
-        # termrkViewState: @termrkView.serialize()
+        # FIXME should this be supported?
+        # if so, in which cases?
