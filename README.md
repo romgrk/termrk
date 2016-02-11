@@ -8,8 +8,9 @@ don't.
 It slides in and out with a single keystroke, mapped to `alt-space` by
 default. Efficient and simple.
 
+<!--FIXME TOC doesnt seem to work on atom.io ¡gfm! -->
 1. [Overview](#overview)
-2. [Keybindings](#keybindings)
+2. [Keybindings](#--keybindings)
 3. [Commands](#commands)
 4. [User-commands](#user-commands)
 5. [Styling](#styling)
@@ -19,6 +20,7 @@ default. Efficient and simple.
 ## Overview
 
 ![Termrk Screenshot](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
+
 <small>Termrk existing.</small>
 
 **Currently implemented:**
@@ -43,16 +45,16 @@ very easy to access.
 
 **→ workspace**
 
-`alt-space`:      toggle terminal panel
-`ctrl-alt-space`: create terminal in current file's dir
-`ctrl-alt-shift-space`: insert current selection in active terminal
+ - `alt-space`:      toggle terminal panel
+ - `ctrl-alt-space`: create terminal in current file's dir
+ - `ctrl-alt-shift-space`: insert current selection in active terminal
 
 **→ inside terminal**
 
-`ctrl-escape`:    close current terminal
-`ctrl-space`:     create terminal
-`ctrl-tab`:       activate next terminal
-`ctrl-shift-tab`: activate previous terminal
+ - `ctrl-escape`:    close current terminal
+ - `ctrl-space`:     create terminal
+ - `ctrl-tab`:       activate next terminal
+ - `ctrl-shift-tab`: activate previous terminal
 
 
 **Note**: if a `keystroke` is catched by an atom-command but you need it inside terminal, add the following code to you `keymap.cson`.
@@ -88,7 +90,7 @@ User commands are defined in the file `$ATOM_HOME/userCommands.cson`.
 (file path can be configured *via* Atom Settings)
 
 Commands have this format:
-```coffeescript
+```coffee
 'echofile':
   command: 'echo The current file is $FILE'
 ```
@@ -96,8 +98,8 @@ The previous command description would be mapped to `'termrk:command-echofile'`,
 and calling that command would run `'echo The current file is $FILE'` in 
 terminal.
 
-Other examples: 
-```coffeescript
+Other examples:
+```coffee
 'shellreplace':
   'command': 'gnome-shell --replace --display :0'
 
