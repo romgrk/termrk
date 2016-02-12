@@ -96,12 +96,9 @@ module.exports = Termrk =
 
         @loadUserCommands()
 
-        @loadKeymap()
-
         @subscriptions.add Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
-            'useDefaultKeymap': @loadKeymap.bind(@)
 
         # Create elements and activate
         @setupElements()
@@ -351,16 +348,6 @@ module.exports = Termrk =
 
     registerCommands: (args...) ->
         @subscriptions.add atom.commands.add args...
-
-    # Private: updates package keymap
-    loadKeymap: ->
-        keymapPath = Path.resolve __dirname, '../res/termrk.cson'
-        if Config.useDefaultKeymap
-            atom.keymaps.loadKeymap(keymapPath)
-            console.log 'loaded ', keymapPath
-        else
-            atom.keymaps.removeBindingsFromSource keymapPath
-            console.log 'removed ', keymapPath
 
     shellEscape: (s) ->
         s.replace(/(["\n'$`\\])/g,'\\$1')

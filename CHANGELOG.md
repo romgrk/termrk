@@ -1,3 +1,6 @@
+## 0.2.1
+* revert point #3 of v0.1.25 :: made void by recent updates to Atom keymap
+
 ## 0.1.27
 * fixed: error on 'create-terminal-current-dir' when no active editor
 

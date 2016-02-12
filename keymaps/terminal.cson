@@ -1,6 +1,21 @@
 
+# in workspace
 'atom-workspace':
-    'alt-space': 'termrk:toggle'
+    'alt-space':            'termrk:toggle'
+    'ctrl-alt-space':       'termrk:create-terminal-current-dir'
+    'ctrl-alt-shift-space': 'termrk:insert-selection'
+
+# in termrk view
+'.termrk':
+    'shift-insert': 'core:paste'
+
+    'ctrl-escape':    'termrk:close-terminal'
+    'ctrl-space':     'termrk:create-terminal'
+    'ctrl-tab':       'termrk:activate-next-terminal'
+    'ctrl-shift-tab': 'termrk:activate-previous-terminal'
+
+    '%': 'termrk:trigger-keypress'
+    '% f': 'termrk:insert-filename'
 
 '.termrk':
     'enter':           'native!'

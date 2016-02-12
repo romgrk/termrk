@@ -34,13 +34,6 @@ class TermrkConfig
             default: 'true'
 
         # User options
-        'useDefaultKeymap':
-            title:       'Default keymap'
-            description: 'Use keymap provided by Termrk package.\n' +
-                         'Do not forget to add your own bindings if '+
-                         'you disable this.'
-            type:        'boolean'
-            default:     'true'
         'userCommandsFile':
             title: 'User commands file'
             description: 'File where your commands are stored.\n' +
