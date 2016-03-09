@@ -20,6 +20,7 @@ programsByExtname =
     '.py':     'python'
     '.py3':    'python3'
     '.coffee': 'coffee'
+    '.pl':     'swipl'
 
 module.exports = Termrk =
 
