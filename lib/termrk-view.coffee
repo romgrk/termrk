@@ -20,9 +20,9 @@ Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
-debug = -> return
-if window.debug == 1
-    debug = (...) -> console.debug(...)
+debug = (m...) ->
+    return unless window.debug == true
+    console.debug(m...)
 
 module.exports =
 class TermrkView extends View

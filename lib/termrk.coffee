@@ -339,7 +339,7 @@ module.exports = Termrk =
         catch error
             console.log "Termrk: couldn't load commands in #{userCommandsFile}"
             if error.code != "ENOENT"
-              console.error error if window.debug
+              console.error error if window.debug == true
             @userCommands = {}
             return
 
