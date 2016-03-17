@@ -213,13 +213,13 @@ class TermrkView extends View
 
     # Private: called after this terminal view has been activated
     activated: ->
-        @updateTerminalSize()
-        @focus()
+        #@updateTerminalSize()
+        #@focus()
 
     # Private: called after this terminal view has been deactivated
     deactivated: ->
-        return unless document.activeElement is @input
-        @blur()
+        #return unless document.activeElement is @input
+        #@blur()
 
     ###
     Section: display/render
@@ -228,6 +228,7 @@ class TermrkView extends View
     # Public: animate height to fill the container.
     animatedShow: (cb) ->
         @stop()
+        @focus()
         @animate {height: '100%'}, 250, =>
             @updateTerminalSize()
             cb?()
@@ -235,6 +236,7 @@ class TermrkView extends View
     # Public: animate height to 0px.
     animatedHide: (cb) ->
         @stop()
+        @blur()
         @animate {height: '0'}, 250, ->
             cb?()
 

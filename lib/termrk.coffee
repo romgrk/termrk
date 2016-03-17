@@ -1,7 +1,5 @@
 
-
 Path                  = require 'path'
-fs                    = require 'fs-plus'
 interact              = require 'interact.js'
 CSON                  = require 'season'
 {CompositeDisposable} = require 'atom'
@@ -36,7 +34,7 @@ module.exports = Termrk =
     subscriptions: null
 
     # Public: {TerminalView} list and active view
-    views:      {}
+    views:      []
     activeView: null
 
     # Private: config description
@@ -86,8 +84,8 @@ module.exports = Termrk =
                 content = atom.clipboard.read()
                 @activeView.write(content)
                 @activeView.focus()
-            'termrk:close-terminal':   =>
-                @removeTerminal(@getActiveTerminal())
+            'termrk:close-terminal': =>
+                @removeCurrentView()
             'termrk:activate-next-terminal':   =>
                 @setActiveTerminal(@getNextTerminal())
                 @show()
@@ -104,7 +102,8 @@ module.exports = Termrk =
         # Create elements and activate
         @setupElements()
 
-        @setActiveTerminal(@createTerminal())
+        view = @createTerminal()
+        @setActiveTerminal(view)
 
         window.termrk = @ if window.debug == true
 
@@ -147,10 +146,10 @@ module.exports = Termrk =
     createTerminal: (options={}) ->
         termrkView = new TermrkView
         @containerView.append termrkView
-        @views[termrkView.time] = termrkView # TODO manage by css selector
+        @views.push termrkView
 
         [cols, rows] = termrkView.calculateTerminalDimensions(
-            termrkView.find('.terminal').width(), Config.defaultHeight)
+            @panelView.width(), Config.defaultHeight)
         cols = 80 if cols < 80 # FIXME
 
         options.cols ?= cols
@@ -158,7 +157,7 @@ module.exports = Termrk =
 
         termrkView.start(options)
 
-        termrkView.height(0)
+        termrkView.height(0) # FIXME
         return termrkView
 
     ###
@@ -167,72 +166,70 @@ module.exports = Termrk =
 
     # Private: get previous terminal, sorted by creation time
     getPreviousTerminal: ->
-        keys  = Object.keys(@views).sort()
-
         unless @activeView?
-            return null if keys.length is 0
-            return @views[keys[0]]
+            return null if @views.length is 0
+            return @views[0]
 
-        index = keys.indexOf @activeView.time
-        index = if index is 0 then (keys.length - 1) else (index - 1)
-        key   = keys[index]
+        index = @views.indexOf @activeView
+        index = if index is 0 then (@views.length - 1) else (index - 1)
 
-        return @views[key]
+        return @views[index]
 
     # Private: get next terminal, sorted by creation time
     getNextTerminal: ->
-        keys  = Object.keys(@views).sort()
-
         unless @activeView?
-            return null if keys.length is 0
-            return @views[keys[0]]
+            return null if @views.length is 0
+            return @views[0]
 
-        index = keys.indexOf @activeView.time
-        index = (index + 1) % keys.length
-        key   = keys[index]
+        index = if index is 0 then (@views.length - 1) else (index - 1)
 
-        return @views[key]
+        index = @views.indexOf @activeView
+        index = (index + 1) % @views.length
 
-    getActiveTerminal: ->
-        return @activeView if @activeView?
-        @setActiveTerminal(@createTerminal())
-        return @activeView
+        return @views[index]
+
+    getActiveView: ->
+        if @activeView?
+            return @activeView
+        return null
 
     setActiveTerminal: (term) ->
+        return unless term?
         return if term is @activeView
 
-        if @panel.isVisible()
-            @activeView?.animatedHide()
-            @activeView?.deactivated()
-            @activeView = term
-            @activeView.animatedShow()
-            @activeView.activated()
-        else
-            @activeView?.hide()
-            @activeView?.height(0)
-            @activeView?.deactivated()
-            @activeView = term
-            @activeView.show()
-            @activeView.height('100%')
-            @activeView.activated()
+        # if not @panel.isVisible()
+            # @show()
+
+        @activeView?.animatedHide()
+        #@activeView.deactivated()
+
+        @activeView = term
+        @activeView.animatedShow()
+        #@activeView.activated()
 
         window.term = @activeView if window.debug == true
-        window.termjs = @activeView.termjs if window.debug == true
+        #window.termjs = @activeView.termjs if window.debug == true
 
-    removeTerminal: (term) ->
-        return unless @views[term.time]?
+    # @deprecated
+    removeTerminal: ->
+        @removeCurrentView()
 
-        if term is @activeView
-            nextTerm = @getNextTerminal()
-            term.animatedHide(-> term.destroy())
-            if term isnt nextTerm
-                @setActiveTerminal(nextTerm)
-            else
-                @setActiveTerminal(@createTerminal()) # TODO optionnal?
+    removeCurrentView: ->
+        return if @views.length == 0 or not @activeView?
+        view = @activeView
+        index = @views.indexOf @activeView
+
+        if @views.length == 1
+            nextTerm = @createTerminal()
         else
-            term.destroy()
+            nextTerm = @getNextTerminal()
 
-        delete @views[term.time]
+        @views.splice(index, 1)
+        @activeView = nextTerm
+
+        view.animatedHide(-> view.destroy())
+        nextTerm.animatedShow()
+        nextTerm.activated()
 
     ###
     Section: commands handlers
@@ -245,9 +242,12 @@ module.exports = Termrk =
         @restoreFocus()
 
         @panelView.stop()
-        @panelView.transition {height: '0'}, 250, 'ease-in-out', =>
+        @panelView.transition {
+            height: '0'
+            duration: Config.transitionDuration
+            easing:   Config.transitionEasing }, =>
             @panel.hide()
-            @activeView.deactivated()
+            # @activeView.deactivated()
             callback?()
 
     show: (callback) ->
@@ -260,8 +260,9 @@ module.exports = Termrk =
         @panelView.stop()
         @panelView.transition {
             height: "#{Config.defaultHeight-2}px"
-            }, 250, 'ease-in-out', =>
-            @activeView?.activated()
+            duration: Config.transitionDuration
+            easing:   Config.transitionEasing }, =>
+            @activeView?.updateTerminalSize()
             callback?()
 
     toggle: ->

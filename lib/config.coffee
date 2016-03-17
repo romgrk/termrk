@@ -18,7 +18,7 @@ class TermrkConfig
         'startingDir':
             title:       'Start dir'
             description: 'Dir where the shell should be started.' +
-                         '\n*cwd* means current file\'s directory'
+                         '\n“cwd” means current file\'s directory'
             type:        'string'
             default:     'project'
             enum:        ['home', 'project', 'cwd']
@@ -37,7 +37,7 @@ class TermrkConfig
         'userCommandsFile':
             title: 'User commands file'
             description: 'File where your commands are stored.\n' +
-                         '(absolute or relative to ' +
+                         '(relative paths are resolved from: ' +
                          atom.getConfigDirPath() + ')'
             type: 'string'
             default: 'userCommands.cson'
@@ -58,6 +58,17 @@ class TermrkConfig
             title:       'Font family'
             type:        'string'
             default:     'Monospace'
+
+        'transitionEasing':
+            title:       'Transition easing function'
+            description: 'Standard css easings or Tween.js-style.\n' +
+                         '(previous value was \'ease-in-out\')'
+            type:        'string'
+            default:     'easeInExpo'
+        'transitionDuration':
+            title:       'Transition duration'
+            type:        'integer'
+            default:     250
 
 
     constructor: (packageName) ->
