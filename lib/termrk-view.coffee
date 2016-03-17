@@ -20,6 +20,10 @@ Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
+debug = (m...) ->
+    return unless window.debug == true
+    console.debug(m...)
+
 module.exports =
 class TermrkView extends View
 
@@ -152,9 +156,11 @@ class TermrkView extends View
 
         if event.defaultPrevented
             event.stopImmediatePropagation()
+            debug('inputKeydown(prevented):', event)
             return false
         else if @model?
             allow = @termjs.keyDown.call(@termjs, event)
+            debug('inputKeydown(allowed):', event)
             return allow
         else
             @start() if event.keyCode == 13 # enter
@@ -163,7 +169,7 @@ class TermrkView extends View
     inputPaste: (event) =>
         if process.platform isnt 'linux' # implemented specifically for
           return                         # middle-click-paste on Xorg server
-        console.debug('inputPaste:', event) if window.debug
+        debug('inputPaste:', event)
         @write clipboard.readText('selection')
 
     # Private: mouseWheel event callback
@@ -213,13 +219,13 @@ class TermrkView extends View
 
     # Private: called after this terminal view has been activated
     activated: ->
-        @updateTerminalSize()
-        @focus()
+        #@updateTerminalSize()
+        #@focus()
 
     # Private: called after this terminal view has been deactivated
     deactivated: ->
-        return unless document.activeElement is @input
-        @blur()
+        #return unless document.activeElement is @input
+        #@blur()
 
     ###
     Section: display/render
@@ -228,6 +234,7 @@ class TermrkView extends View
     # Public: animate height to fill the container.
     animatedShow: (cb) ->
         @stop()
+        @focus()
         @animate {height: '100%'}, 250, =>
             @updateTerminalSize()
             cb?()
@@ -235,6 +242,7 @@ class TermrkView extends View
     # Public: animate height to 0px.
     animatedHide: (cb) ->
         @stop()
+        @blur()
         @animate {height: '0'}, 250, ->
             cb?()
 
