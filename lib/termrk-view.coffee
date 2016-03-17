@@ -20,6 +20,10 @@ Font   = Utils.Font
 Keymap = Utils.Keymap
 Paths  = Utils.Paths
 
+debug = -> return
+if window.debug == 1
+    debug = (...) -> console.debug(...)
+
 module.exports =
 class TermrkView extends View
 
@@ -152,9 +156,11 @@ class TermrkView extends View
 
         if event.defaultPrevented
             event.stopImmediatePropagation()
+            debug('inputKeydown(prevented):', event)
             return false
         else if @model?
             allow = @termjs.keyDown.call(@termjs, event)
+            debug('inputKeydown(allowed):', event)
             return allow
         else
             @start() if event.keyCode == 13 # enter
@@ -163,7 +169,7 @@ class TermrkView extends View
     inputPaste: (event) =>
         if process.platform isnt 'linux' # implemented specifically for
           return                         # middle-click-paste on Xorg server
-        console.debug('inputPaste:', event) if window.debug
+        debug('inputPaste:', event)
         @write clipboard.readText('selection')
 
     # Private: mouseWheel event callback
