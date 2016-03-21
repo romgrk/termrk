@@ -1,3 +1,8 @@
+## 0.2.3
+* more efficient internal views management
+* added options: transisitionEasing and transitionDuration
+* added debug hooks (verbose when window.debug == true)
+
 ## 0.2.1
 * revert point #3 of v0.1.25 :: made void by recent updates to Atom keymap
 
