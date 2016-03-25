@@ -227,7 +227,8 @@ module.exports = Termrk =
         @views.splice(index, 1)
         @activeView = nextTerm
 
-        view.animatedHide(-> view.destroy())
+        view.animatedHide(() ->
+            view?.destroy())
         nextTerm.animatedShow()
         nextTerm.activated()
 
@@ -365,8 +366,8 @@ module.exports = Termrk =
         @focusedElement = null
 
     deactivate: ->
-        for time, term of @views
-            term.destroy()
+        for view in @views
+            view?.destroy()
         @panel.destroy()
         @subscriptions.dispose()
 

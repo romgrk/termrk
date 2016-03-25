@@ -102,10 +102,10 @@ class TermrkModel
         @pty.pid
 
     kill: ->
-        @pty?.kill()
+        @pty?.terminate()
 
     destroy: ->
-        @pty?.destroy()
+        @pty?.terminate()
 
     getView: ->
         @view
