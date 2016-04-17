@@ -92,6 +92,7 @@ class TermrkView extends View
             cols: @options.cols
             rows: @options.rows
             name: @options.name
+            colors: Config.terminalColors
         @termjs.open @element
 
         @attachListeners()
