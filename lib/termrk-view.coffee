@@ -44,6 +44,12 @@ class TermrkView extends View
         @instances.forEach (instance) ->
             instance.updateFont.call(instance)
 
+    @colorsChanged: ({oldValue, newValue}) =>
+        return unless newValue.length is 8 or newValue.length is 16 or
+            newValue.length is 10 or newValue.length is 18
+        @instances.forEach (instance) ->
+            instance.updateColors(oldValue, newValue)
+
     ###
     Section: instance
     ###
@@ -273,6 +279,22 @@ class TermrkView extends View
         @css 'font', computedFont
 
         @updateTerminalSize()
+
+    # Public: set colors from config
+    updateColors: (oldValue, newValue) =>
+        # replace currently visible colors
+        for color, i in newValue
+            @find("[style*=\"#{oldValue[i]}\"], [data-color=\"#{oldValue[i]}\"]")
+                .css {color}
+                .attr 'data-color', color
+
+        # update colors array on @termjs
+        length = newValue.length
+        @termjs.colors = if length % 8 is 0
+            newValue.concat @termjs.colors.slice(length)
+        else
+            newValue.slice(0, -2).concat(@termjs.colors.slice(length - 2, -2))
+                .concat(newValue.slice(-2))
 
     # Public: returns [cols, rows] for the given width and height
     calculateTerminalDimensions: (width, height) ->
