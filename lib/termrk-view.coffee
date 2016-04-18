@@ -282,19 +282,19 @@ class TermrkView extends View
 
     # Public: set colors from config
     updateColors: (oldValue, newValue) =>
-        # replace currently visible colors
-        for color, i in newValue
-            @find("[style*=\"#{oldValue[i]}\"], [data-color=\"#{oldValue[i]}\"]")
-                .css {color}
-                .attr 'data-color', color
-
         # update colors array on @termjs
         length = newValue.length
-        @termjs.colors = if length % 8 is 0
-            newValue.concat @termjs.colors.slice(length)
+        if length % 8 is 0
+            @termjs.colors = newValue.concat @termjs.colors.slice(length)
         else
-            newValue.slice(0, -2).concat(@termjs.colors.slice(length - 2, -2))
-                .concat(newValue.slice(-2))
+            @termjs.colors = newValue.slice(0, -2).concat(
+                @termjs.colors.slice(length - 2, -2), newValue.slice(-2))
+            @find('.terminal').css
+                'background-color': newValue[length - 2]
+                'color'           : newValue[length - 1]
+
+        # refresh
+        @termjs.refresh 0, @termjs.rows
 
     # Public: returns [cols, rows] for the given width and height
     calculateTerminalDimensions: (width, height) ->

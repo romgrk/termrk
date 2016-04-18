@@ -92,6 +92,10 @@ class TermrkConfig
                              '#ff00ff' # magenta
                              '#00ffff' # cyan
                              '#ffffff' # white
+                             # background
+                             '#000000'
+                             # foreground
+                             '#f0f0f0'
                          ]
             items:
                 type:    'string'

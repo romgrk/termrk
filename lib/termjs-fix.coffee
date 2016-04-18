@@ -51,8 +51,8 @@ class Terminal extends termjs.Terminal
         @element.setAttribute('tabindex', 0)
 
         # This allows user to set terminal style in CSS
-        @colors[256] = @element.style.backgroundColor
-        @colors[257] = @element.style.color
+        @element.style.backgroundColor = @colors[256]
+        @element.style.color = @colors[257]
 
         # Create the lines for our terminal.
         @children = []
