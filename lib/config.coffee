@@ -72,6 +72,12 @@ class TermrkConfig
 
         'terminalColors':
             title:       'Terminal colors'
+            description: 'The colors to be substituted for the \\x1b[XXm ' +
+                         'escape sequences. The first 8 values represent ' +
+                         'the dim colors, the next 8 are optional and ' +
+                         'represent the bright/bold values and the last 2, ' +
+                         'also optional, are the default background and ' +
+                         'foreground colors.'
             type:        'array'
             default:     [
                              # dark:
