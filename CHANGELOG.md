@@ -1,3 +1,6 @@
+## 0.2.4
+* add setting `terminalColors`
+
 ## 0.2.3
 * more efficient internal views management
 * added options: transisitionEasing and transitionDuration
