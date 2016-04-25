@@ -98,6 +98,7 @@ module.exports = Termrk =
         @subscriptions.add Config.observe
             'fontSize':   -> TermrkView.fontChanged()
             'fontFamily': -> TermrkView.fontChanged()
+            'terminalColors': (values) -> TermrkView.colorsChanged(values)
 
         # Create elements and activate
         @setupElements()
