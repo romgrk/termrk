@@ -21,8 +21,6 @@ default. Efficient and simple.
 
 ![Termrk Screenshot](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
 
-<small>Termrk existing.</small>
-
 **Currently implemented:**
  - multiple terminal sessions
  - user defined commands (→ user defined *atom-commands*)
@@ -36,7 +34,7 @@ default. Efficient and simple.
 
 #### Demo: running *vim* inside *termrk* inside *atom*
 
-![vim demo](https://github.com/romgrk/termrk/blob/master/static/out.gif?raw=true)
+![vim demo](https://github.com/romgrk/termrk/blob/master/static/vim.gif?raw=true)
 
 ## ⌨  Keybindings
 
