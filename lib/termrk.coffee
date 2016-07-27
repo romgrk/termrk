@@ -249,6 +249,7 @@ module.exports = Termrk =
     projectPathChanged: (paths) ->
         return unless Config.closeAllOnPathChange == true
         return unless paths[0] != @currentPath
+        @currentPath = paths[0]
         @hide ->
             @removeAll()
 
