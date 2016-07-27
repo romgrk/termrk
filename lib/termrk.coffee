@@ -40,12 +40,16 @@ module.exports = Termrk =
     # Private: config description
     config: Config.schema
 
+    # Private: project path tracker
+    currentPath: null
+
     # Private: user commands
     userCommands: null
 
     activate: (state) ->
         @$ = $
         @config = Config
+        @currentPath = atom.project.getPaths()[0]
 
         @subscriptions = new CompositeDisposable()
 
@@ -100,11 +104,12 @@ module.exports = Termrk =
             'fontFamily': -> TermrkView.fontChanged()
             'terminalColors': (values) -> TermrkView.colorsChanged(values)
 
+        @subscriptions.add atom.project.onDidChangePaths @projectPathChanged.bind(@)
+
         # Create elements and activate
         @setupElements()
 
-        view = @createTerminal()
-        @setActiveTerminal(view)
+        @setActiveTerminal @createTerminal()
 
         window.termrk = @ if window.debug == true
 
@@ -232,6 +237,20 @@ module.exports = Termrk =
             view?.destroy())
         nextTerm.animatedShow()
         nextTerm.activated()
+
+    removeAll: ->
+        for view in @views
+            view?.destroy()
+
+    ###
+    Section: Event handlers
+    ###
+
+    projectPathChanged: (paths) ->
+        return unless Config.closeAllOnPathChange == true
+        return unless paths[0] != @currentPath
+        @hide ->
+            @removeAll()
 
     ###
     Section: commands handlers
@@ -367,8 +386,7 @@ module.exports = Termrk =
         @focusedElement = null
 
     deactivate: ->
-        for view in @views
-            view?.destroy()
+        @removeAll()
         @panel.destroy()
         @subscriptions.dispose()
 
