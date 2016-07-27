@@ -32,6 +32,12 @@ class TermrkConfig
             description: 'Restarts the shell as soon as it is terminated.'
             type: 'boolean'
             default: 'true'
+        'closeAllOnPathChange':
+            title: 'Close terminals on project switch'
+            description: 'Closes all active terminals whenever ' +
+                         'atom.project.onDidChangePaths is fired.'
+            type: 'boolean'
+            default: 'false'
 
         # User options
         'userCommandsFile':
