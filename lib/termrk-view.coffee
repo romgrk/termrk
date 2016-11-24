@@ -79,6 +79,9 @@ class TermrkView extends View
     onDidResize: (callback) ->
         @emitter.on 'resize', callback
 
+    onDidExitProcess: (callback) ->
+        @emitter.on 'exit', callback
+
     ###
     Section: init/setup
     ###
@@ -219,6 +222,7 @@ class TermrkView extends View
         @model.destroy()
         delete @model
 
+        @emitter.emit 'exit', event
         if Config.restartShell
             @start()
         else

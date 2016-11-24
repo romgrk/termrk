@@ -106,6 +106,10 @@ module.exports = Termrk =
         view = @createTerminal()
         @setActiveTerminal(view)
 
+        @subscriptions.add view.onDidExitProcess (code, signal) =>
+            if Config.hideOnExit
+                @hide()
+
         window.termrk = @ if window.debug == true
 
     setupElements: ->
