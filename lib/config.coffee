@@ -32,6 +32,11 @@ class TermrkConfig
             description: 'Restarts the shell as soon as it is terminated.'
             type: 'boolean'
             default: 'true'
+        'hideOnExit':
+            title: 'Hide on exit'
+            description: 'Hides the terminal when the shell is terminated.'
+            type: 'boolean'
+            default: 'false'
 
         # User options
         'userCommandsFile':
