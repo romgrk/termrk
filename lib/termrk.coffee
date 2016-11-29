@@ -268,6 +268,7 @@ module.exports = Termrk =
             callback?()
 
     toggle: ->
+        return unless @panel?
         if @panel.isVisible()
             @hide()
         else

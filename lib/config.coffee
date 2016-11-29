@@ -134,6 +134,7 @@ class TermrkConfig
             disposable = new CompositeDisposable
             for k, fn of key
                 disposable.add atom.config.onDidChange(@prefix+k, fn)
+            return disposable
         else
             atom.config.onDidChange(@prefix+key, callback)
 
