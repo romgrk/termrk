@@ -133,7 +133,7 @@ module.exports = Termrk =
 
         .on 'resizemove', (event) ->
             target = event.target
-            target.style.height = event.rect.height + 'px';
+            target.style.height = event.rect.height + 'px'
 
         .on 'resizeend', (event) =>
             Config.defaultHeight = parseInt event.target.style.height
