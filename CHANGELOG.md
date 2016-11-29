@@ -1,3 +1,7 @@
+## 0.3.0
+* add setting `hideOnExit` (@HebaruSan)
+* override `ctrl+w` and `ctrl+z` by default (@HebaruSan)
+
 ## 0.2.4
 * add setting `terminalColors`
 
