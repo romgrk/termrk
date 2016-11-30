@@ -77,9 +77,11 @@ module.exports = Termrk =
             'termrk:trigger-keypress': =>
                 @activeView.triggerKeypress()
             'termrk:insert-filename': =>
-                content = atom.workspace.getActiveTextEditor().getURI()
-                @activeView.write(content)
-                @activeView.focus()
+                activeEditor = atom.workspace.getActiveTextEditor()
+                if activeEditor
+                  content = activeEditor.getURI()
+                  @activeView.write(content)
+                  @activeView.focus()
             'core:paste': =>
                 content = atom.clipboard.read()
                 @activeView.write(content)
