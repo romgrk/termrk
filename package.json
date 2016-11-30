@@ -1,7 +1,7 @@
 {
   "name": "Termrk",
   "main": "./lib/termrk",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Terminal panel inside Atom",
   "activationCommands": {
     "atom-workspace": [
