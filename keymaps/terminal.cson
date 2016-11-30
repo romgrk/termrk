@@ -17,7 +17,6 @@
     '%': 'termrk:trigger-keypress'
     '% f': 'termrk:insert-filename'
 
-'.termrk':
     'enter':           'native!'
     'backspace':       'native!'
     'shift-backspace': 'native!'
