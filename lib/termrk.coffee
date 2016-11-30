@@ -215,10 +215,6 @@ module.exports = Termrk =
         window.term = @activeView if window.debug == true
         #window.termjs = @activeView.termjs if window.debug == true
 
-    # @deprecated
-    removeTerminal: ->
-        @removeCurrentView()
-
     removeCurrentView: ->
         return if @views.length == 0 or not @activeView?
         view = @activeView
