@@ -7,7 +7,7 @@ pty = require 'pty.js'
 {CompositeDisposable} = require 'atom'
 clipboard             = require 'clipboard'
 {$$, View}            = require 'space-pen'
-{Key, KeyKit}         = require 'keykit'
+{Key, KeyKit, KeyStroke} = require 'keykit'
 
 Termrk      = require './termrk'
 
@@ -206,13 +206,6 @@ class TermrkView extends View
             amount = -1 * (deltaY / Math.abs(deltaY))
 
         @termjs.scrollDisp(amount)
-
-    # Private: insert character from passed event.
-    triggerKeypress: (event) =>
-        keystroke = KeyKit.fromKBEvent event.originalEvent
-        if keystroke.char?
-            keypressEvent = KeyKit.createKBEvent 'keypress', keystroke
-            @input.dispatchEvent keypressEvent
 
     # Private: pty exit callback
     processExit: (event) ->

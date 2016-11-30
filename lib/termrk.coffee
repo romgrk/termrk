@@ -74,8 +74,6 @@ module.exports = Termrk =
                 @show()
 
         @registerCommands '.termrk',
-            'termrk:trigger-keypress': =>
-                @activeView.triggerKeypress()
             'termrk:insert-filename': =>
                 activeEditor = atom.workspace.getActiveTextEditor()
                 if activeEditor

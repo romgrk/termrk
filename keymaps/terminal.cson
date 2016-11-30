@@ -14,9 +14,6 @@
     'ctrl-tab':       'termrk:activate-next-terminal'
     'ctrl-shift-tab': 'termrk:activate-previous-terminal'
 
-    '%': 'termrk:trigger-keypress'
-    '% f': 'termrk:insert-filename'
-
     'enter':           'native!'
     'backspace':       'native!'
     'shift-backspace': 'native!'

@@ -24,7 +24,7 @@ default. Efficient and simple.
 **Currently implemented:**
  - multiple terminal sessions
  - user defined commands (→ user defined *atom-commands*)
- - running current file in terminal 
+ - running current file in terminal
    (supports `.js`, `.node`, `.coffee`, `.py` and shebang-notation―`#!`)
  - inserting selection to/from the buffer
  - inserting current file/directory path
@@ -76,7 +76,7 @@ very easy to access.
 | `termrk:create-terminal-current-dir` | Creates session in current file's directory | `atom-workspace` | `ctrl-alt-space`        |
 | `termrk:close-terminal`              | Close active terminal session               | `.termrk`        | `ctrl-escape`           |
 | `termrk:insert-selection`            | Inserts current selection in terminal       | `atom-workspace` | `ctrl-alt-sphift-space` |
-| `termrk:insert-filename`             | Insert current file's path in terminal      | `.termrk`        | `% f`                   |
+| `termrk:insert-filename`             | Insert current file's path in terminal      | `.termrk`        |                         |
 | `termrk:run-current-file`            | Runs current file in terminal               | `atom-workspace` |                         |
 | `termrk:create-terminal`             | Creates a terminal-session                  | `atom-workspace` |                         |
 | `termrk:activate-next-terminal`      | Cycles forward terminal-sessions            | `atom-workspace` |                         |
@@ -93,7 +93,7 @@ Commands have this format:
   command: 'echo The current file is $FILE'
 ```
 The previous command description would be mapped to `'termrk:command-echofile'`,
-and calling that command would run `'echo The current file is $FILE'` in 
+and calling that command would run `'echo The current file is $FILE'` in
 terminal.
 
 Other examples:
@@ -139,7 +139,7 @@ Example for black text on white bg, and blue cursor-bg.
 
 ## Credits
 
-Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty] 
+Termrk is a terminal implementation based on [term.js][term] and [pty.js][pty]
 modules by Christopher Jeffrey.
 
 Atom is a text-editor developped by github etc. etc....
