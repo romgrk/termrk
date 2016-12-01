@@ -57,7 +57,7 @@ class TermrkModel
         _.extend @options, options
 
         @options.shell ?= Config.getDefaultShell()
-        @options.cwd   ?= Config.getStartingDir()
+        @options.cwd    = Config.getStartingDir()
         @options.cols  ?= 200 # avoids init messages being cropped FIXME
         @options.rows  ?= 24
         @options.parameters ?= Config.getDefaultParameters()

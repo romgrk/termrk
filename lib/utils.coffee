@@ -51,7 +51,11 @@ Utils =
         OS.tmpdir()
 
     getProjectDir: ->
-        atom.project.getPaths()[0] ? Fs.getHomeDirectory()
+        filepath = atom.workspace.getActivePaneItem()?.buffer?.file?.path
+        if filepath?
+            atom.project.relativizePath(filepath)[0]
+        else
+            atom.project.getPaths()[0] ? Fs.getHomeDirectory()
 
     getCurrentDir: ->
         editor = atom.workspace.getActiveTextEditor()
