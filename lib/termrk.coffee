@@ -305,19 +305,22 @@ module.exports = Termrk =
             @focus()
 
     runCurrentFile: () ->
-        file = atom.workspace.getActiveTextEditor().getURI()
-        extname = Path.extname file
+        activeEditor = atom.workspace.getActiveTextEditor()
+        return unless activeEditor?
 
-        firstLine = atom.workspace.getActiveTextEditor().lineTextForBufferRow(0)
+        filename  = activeEditor.getURI()
+        extname   = Path.extname filename
+        firstLine = activeEditor.lineTextForBufferRow(0)
+
         if (shebang = firstLine.match /#!(.+)$/)
             program = shebang[1]
         else if programsByExtname[extname]?
             program = programsByExtname[extname]
         else
-            console.log "Termrk: couldnt run file #{file}"
+            console.log "Termrk: couldnt run file #{filename}"
             return
 
-        @activeView.write "#{program} #{file}\n"
+        @activeView.write "#{program} #{filename}\n"
         @focus()
 
     runUserCommand: (commandName, event) ->
