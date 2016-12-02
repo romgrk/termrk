@@ -7,7 +7,6 @@ pty = require 'pty.js'
 {CompositeDisposable} = require 'atom'
 clipboard             = require 'clipboard'
 {$$, View}            = require 'space-pen'
-{Key, KeyKit, KeyStroke} = require 'keykit'
 
 Termrk      = require './termrk'
 
