@@ -1,4 +1,5 @@
 
+_                     = require 'underscore-plus'
 Path                  = require 'path'
 interact              = require 'interact.js'
 CSON                  = require 'season'
@@ -10,6 +11,9 @@ TermrkView  = require './termrk-view'
 TermrkModel = require './termrk-model'
 Config      = require './config'
 Utils       = require './utils'
+
+# Matches shell variables
+SHELL_VAR_PATTERN = /\$(?:\{([_a-zA-Z][_\w\d]*)\}|([_a-zA-Z][_\w\d]*))/g
 
 # TODO place this somewhere else & add more programs
 programsByExtname =
@@ -319,9 +323,15 @@ module.exports = Termrk =
     runUserCommand: (commandName, event) ->
         command = @userCommands[commandName].command
 
-        command = command.replace /\$FILE/g, Utils.getCurrentFile()
-        command = command.replace /\$DIR/g, Utils.getCurrentDir()
-        command = command.replace /\$PROJECT/g, Utils.getProjectDir()
+        variables = {
+            FILE:    Utils.getCurrentFile()
+            DIR:     Utils.getCurrentDir()
+            PROJECT: Utils.getProjectDir()
+        }
+        _.extend variables, process.env
+
+        command = command.replace SHELL_VAR_PATTERN, (m, p1, p2) ->
+            variables[p1 || p2] || m
 
         unless command[-1..] is '\n'
             command += '\n'
