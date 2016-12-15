@@ -118,6 +118,7 @@ module.exports = Termrk =
 
     setupElements: ->
         @containerView = @createContainer()
+        @containerView.focus = -> Termrk.focus()
 
         @panel = atom.workspace.addBottomPanel(
             item: @containerView
