@@ -114,8 +114,8 @@ In addition to environment variables, you can also use these:
 
 | Name       | Value                         |
 | ----       | -----                         |
-| `$FILE`    | path of the current file        |
-| `$DIR`     | directory of the current file   |
+| `$FILE`    | path of the current file      |
+| `$DIR`     | directory of the current file |
 | `$PROJECT` | path of the project directory |
 
 

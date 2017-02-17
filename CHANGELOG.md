@@ -1,3 +1,8 @@
+## 1.0.0
+* remove default keybinding for 'termrk:insert-filename'
+* value `project` of option `startingDir` now opens a shell in the current's
+  file parent folder if there are multiple project folders (@HebaruSan)
+
 ## 0.3.0
 * add setting `hideOnExit` (@HebaruSan)
 * override `ctrl+w` and `ctrl+z` by default (@HebaruSan)
