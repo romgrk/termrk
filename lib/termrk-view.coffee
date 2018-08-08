@@ -303,8 +303,7 @@ class TermrkView extends View
 
     # Public: get terminal element font
     getCharDimensions: ->
-        font   = @find('.terminal').css 'font'
-        width  = Utils.getFontWidth("a", font)
+        width  = Utils.getFontWidth("a", @find('.terminal'))
         height  = @find('.terminal > div:first-of-type').height()
         return [width, height]
 

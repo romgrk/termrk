@@ -12,36 +12,23 @@ OS   = require 'os'
 
 Utils =
     # Public: get the width of the text with specified font
-    getFontWidth: (text, font) ->
-        font = font || $('body').css('font')
+    getFontWidth: (text, element) ->
+        element = element || $(document.body)
+        styles = window.getComputedStyle(element[0], null)
         o = $('<div>' + text + '</div>')
-        .css({
-            'position': 'absolute',
-            'float': 'left',
-            'white-space': 'nowrap',
-            'visibility': 'hidden',
-            'font': font})
-        .appendTo($('body'))
-        w = o.width()
-
+            .css({
+                'position': 'absolute',
+                'float': 'left',
+                'white-space': 'nowrap',
+                'visibility': 'hidden',
+                'font': styles.getPropertyValue('font'),
+                'font-size': styles.getPropertyValue('font-size'),
+            })
+            .appendTo($(document.body))
+        width = o[0].getBoundingClientRect().width
         o.remove()
 
-        return w
-
-    # Public: get the height of the text with specified font
-    getFontHeight: (text, font) ->
-        font = font || $('body').css('font')
-        o = $('<div>' + text + '</div>')
-        .css({
-            'position': 'absolute',
-            'float': 'left',
-            'white-space': 'nowrap',
-            'visibility': 'hidden',
-            'font': font})
-        .appendTo($('body'))
-        h = o.height()
-        o.remove()
-        return h
+        return width
 
     # Path etc
     getHomeDir: ->
